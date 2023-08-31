@@ -17,6 +17,8 @@ class FileHandlerTest extends TestCase
         parent::setUp();
 
         $this->fileHandler = new FileHandler();
+        fopen(filename: "file", mode: "w");
+
     }
 
     protected function tearDown(): void
@@ -24,6 +26,7 @@ class FileHandlerTest extends TestCase
         parent::tearDown();
 
         $this->fileHandler = null;
+        unlink(filename: "file");
     }
 
 
@@ -31,11 +34,11 @@ class FileHandlerTest extends TestCase
     #[TestDox("file was written successfully!")]
     public function file_successfully_written()
     {
-        $this->fileHandler->open(filename: 'file.txt');
+        $this->fileHandler->open(filename: 'file');
 
         $this->fileHandler->write(data: "hello world");
 
-        $this->assertEquals(expected: "hello world", actual: file_get_contents(filename: 'file.txt'));
+        $this->assertEquals(expected: "hello world", actual: file_get_contents(filename: 'file'));
     }
 
     #[Test]
@@ -44,15 +47,14 @@ class FileHandlerTest extends TestCase
     {
         $this->expectException(FileNotFoundException::class);
         $this->expectExceptionMessage('File not found');
-        $this->fileHandler->open(filename: 'unknown', mode: 'r');
+        $this->fileHandler->open(filename: 'unknown');
     }
 
     #[Test]
     #[TestDox("should throw an exception if file is not writable")]
     public function should_throw_exception_if_file_is_not_writable()
     {
-
-        $this->fileHandler->open(filename: 'file', mode: 'r');
+        $this->fileHandler->open(filename: 'file',mode: 'r');
 
         $this->expectException(CouldNotWriteFileException::class);
         $this->expectExceptionMessage('Error writing to file');
@@ -65,13 +67,15 @@ class FileHandlerTest extends TestCase
     {
         $this->fileHandler->open(filename: 'file');
 
-        $this->fileHandler->open(filename: 'file1');
+        $this->fileHandler->open(filename: 'file1',mode: 'w');
 
         $this->fileHandler->write(data: "hello world");
 
         $this->assertEquals("hello world", file_get_contents(filename: 'file'));
 
         $this->assertEquals("hello world", file_get_contents(filename: 'file1'));
+
+        unlink("file1");
     }
 
 
@@ -85,11 +89,6 @@ class FileHandlerTest extends TestCase
 
         $this->expectException(TypeError::class);
         $this->fileHandler->write(data: "fwrite(): supplied resource is not a valid stream resource");
-
-
-
-
     }
-
 
 }

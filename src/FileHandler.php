@@ -13,10 +13,10 @@ class FileHandler
 
     public function open(
         string $filename,
-        string $mode = 'w',
+        string $mode = "r+",
         bool $include_path = false,
         $context = null
-    ): mixed {
+    ): self {
         $file = fopen($filename, $mode, $include_path, $context);
 
         if (!$file) {
@@ -25,7 +25,7 @@ class FileHandler
 
         $this->files[] = $file;
 
-        return $file;
+        return $this;
     }
 
 
