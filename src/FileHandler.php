@@ -10,6 +10,7 @@ use rcsofttech85\FileHandler\Exception\InvalidFileException;
 
 class FileHandler
 {
+    const ARRAY_FORMAT = 'array';
 
     private array $files = [];
 
@@ -52,29 +53,37 @@ class FileHandler
         }
     }
 
-    public function searchInCsvFile(string $keyword, int $offset = 0): bool
+    public function searchInCsvFile(string $keyword, string $column, string|null $format = null): bool
     {
-        return $this->search($keyword, $offset);
+        return $this->search($keyword, $column, $format);
+    }
+
+    public function toArray(): array
+    {
+        return iterator_to_array($this->getRows());
     }
 
     private function getRows(): Generator
     {
-        foreach ($this->files as $file) {
-            while (($row = fgetcsv($file)) !== false) {
-                if (count($row) < 2 || !is_array($row)) {
-                    throw new InvalidFileException();
-                }
-                yield $row;
-            }
-            fclose($file);
+        if (count($this->files) > 1) {
+            throw new InvalidFileException("multiple files not allowed");
         }
+
+        $file = $this->files[0];
+        $headers = fgetcsv($file);
+        while (($row = fgetcsv($file)) !== false) {
+            $item = array_combine($headers, $row);
+            yield $item;
+        }
+        fclose($file);
     }
 
-    private function search(string $keyword, int $offset): bool
+
+    private function search(string $keyword, string $column, string|null $format): bool
     {
         foreach ($this->getRows() as $row) {
-            if ($keyword === $row[$offset]) {
-                return true;
+            if ($keyword === $row[$column]) {
+                return ($format === self::ARRAY_FORMAT) ? $row[$column] : true;
             }
         }
         return false;
