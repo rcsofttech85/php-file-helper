@@ -1,5 +1,5 @@
 {
-    "name": "rahul/file-handler",
+    "name": "rcsofttech85/file-handler",
     "description": "A simple library for abstracting various file operations and providing additional helper functions for file manipulation",
     "type": "library",
     "license": "MIT",
