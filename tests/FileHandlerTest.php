@@ -102,11 +102,27 @@ class FileHandlerTest extends TestCase
     }
 
     #[Test]
+    #[DataProvider('provide_studio_names')]
+    #[TestDox('Studio with name $keyword exists in collection.')]
+    public function studio_is_found_for_exact_name_match(string $keyword)
+    {
+        $isStudioFound = $this->fileHandler->open(filename: 'movie.csv')->searchInCsvFile(keyword: $keyword, offset: 2);
+        $this->assertTrue($isStudioFound);
+    }
+
+    #[Test]
     public function should_throw_exception_if_not_valid_csv()
     {
         $this->expectException(InvalidFileException::class);
         $this->expectExceptionMessage("invalid file format");
         $this->fileHandler->open(filename: 'invalid.csv')->searchInCsvFile(keyword: 'hello');
+    }
+
+    public static function provide_studio_names(): iterable
+    {
+        yield ["Fox"];
+        yield ["Universal"];
+        yield ["Warner Bros."];
     }
 
 
