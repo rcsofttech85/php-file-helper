@@ -32,7 +32,6 @@ class FileHandlerTest extends TestCase
 
 
     #[Test]
-    #[TestDox("file was written successfully!")]
     public function file_successfully_written()
     {
         $this->fileHandler->open(filename: 'file');
@@ -43,7 +42,6 @@ class FileHandlerTest extends TestCase
     }
 
     #[Test]
-    #[TestDox("should throw an exception if file is not found")]
     public function should_throw_exception_if_file_is_not_Found()
     {
         $this->expectException(FileNotFoundException::class);
@@ -52,7 +50,6 @@ class FileHandlerTest extends TestCase
     }
 
     #[Test]
-    #[TestDox("should throw an exception if file is not writable")]
     public function should_throw_exception_if_file_is_not_writable()
     {
         $this->fileHandler->open(filename: 'file', mode: 'r');
@@ -63,7 +60,6 @@ class FileHandlerTest extends TestCase
     }
 
     #[Test]
-    #[TestDox("multiple files can be written simultaneously")]
     public function multiple_file_can_be_written_simultaneously()
     {
         $this->fileHandler->open(filename: 'file');
@@ -81,7 +77,6 @@ class FileHandlerTest extends TestCase
 
 
     #[Test]
-    #[TestDox("checks if a movie exists in a collection by a name")]
     public function file_is_closed_properly()
     {
         $this->fileHandler->open(filename: 'file');
@@ -114,8 +109,28 @@ class FileHandlerTest extends TestCase
     public function should_throw_exception_if_not_valid_csv()
     {
         $this->expectException(InvalidFileException::class);
-        $this->expectExceptionMessage("invalid file format");
+        $this->expectExceptionMessage("not a valid csv file");
         $this->fileHandler->open(filename: 'invalid.csv')->searchInCsvFile(keyword: 'hello');
+    }
+
+    #[Test]
+    public function to_array_method_returns_valid_array()
+    {
+        $data = $this->fileHandler->open(filename: 'movie.csv')->toArray();
+
+        $expected = [
+            'Film' => 'Zack and Miri Make a Porno',
+            'Genre' => 'Romance',
+            'Lead Studio' => 'The Weinstein Company',
+            'Audience score %' => '70',
+            'Profitability' => '1.747541667',
+            'Rotten Tomatoes %' => '64',
+            'Worldwide Gross' => '$41.94 ',
+            'Year' => '2008'
+
+        ];
+
+        $this->assertEquals($expected, $data[0]);
     }
 
     public static function provide_studio_names(): iterable

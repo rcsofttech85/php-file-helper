@@ -57,18 +57,39 @@ class FileHandler
         return $this->search($keyword, $offset);
     }
 
+    public function toArray(): array
+    {
+        if (count($this->files) > 2) {
+            throw new InvalidFileException("multiple files not allowed");
+        }
+
+        $headers = fgetcsv($this->files[0]);
+
+        $data = [];
+        while (($row = fgetcsv($this->files[0])) !== false) {
+            if (count($row) < 2 || !is_array($row)) {
+                throw new InvalidFileException('not a valid csv file');
+            }
+            $item = array_combine($headers, $row);
+            $data[] = $item;
+        }
+
+        return $data;
+    }
+
     private function getRows(): Generator
     {
         foreach ($this->files as $file) {
             while (($row = fgetcsv($file)) !== false) {
                 if (count($row) < 2 || !is_array($row)) {
-                    throw new InvalidFileException();
+                    throw new InvalidFileException('not a valid csv file');
                 }
                 yield $row;
             }
             fclose($file);
         }
     }
+
 
     private function search(string $keyword, int $offset): bool
     {
