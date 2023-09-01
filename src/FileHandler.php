@@ -79,7 +79,7 @@ class FileHandler
     }
 
 
-    private function search(string $keyword, string $column, string|null $format): bool
+    private function search(string $keyword, string $column, string|null $format): bool|array
     {
         foreach ($this->getRows() as $row) {
             if ($keyword === $row[$column]) {
@@ -88,5 +88,4 @@ class FileHandler
         }
         return false;
     }
-
 }
