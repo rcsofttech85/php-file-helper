@@ -2,9 +2,11 @@
 
 namespace rcsofttech85\FileHandler;
 
+use Generator;
 use rcsofttech85\FileHandler\Exception\CouldNotWriteFileException;
 use rcsofttech85\FileHandler\Exception\FileNotClosedException;
 use rcsofttech85\FileHandler\Exception\FileNotFoundException;
+use rcsofttech85\FileHandler\Exception\InvalidFileException;
 
 class FileHandler
 {
@@ -48,6 +50,34 @@ class FileHandler
                 throw new FileNotClosedException();
             }
         }
+    }
+
+    public function searchInCsvFile(string $keyword, int $offset = 0): bool
+    {
+        return $this->search($keyword, $offset);
+    }
+
+    private function getRows(): Generator
+    {
+        foreach ($this->files as $file) {
+            while (($row = fgetcsv($file)) !== false) {
+                if (count($row) < 2 || !is_array($row)) {
+                    throw new InvalidFileException();
+                }
+                yield $row;
+            }
+            fclose($file);
+        }
+    }
+
+    private function search(string $keyword, int $offset): bool
+    {
+        foreach ($this->getRows() as $row) {
+            if ($keyword === $row[$offset]) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
