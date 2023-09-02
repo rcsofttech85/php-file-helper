@@ -14,6 +14,9 @@ class FileHandler
 
     private array $files = [];
 
+    /**
+     * @throws FileNotFoundException
+     */
     public function open(
         string $filename,
         string $mode = "r+",
@@ -32,6 +35,9 @@ class FileHandler
     }
 
 
+    /**
+     * @throws CouldNotWriteFileException
+     */
     public function write(string $data, ?int $length = null): void
     {
         foreach ($this->files as $file) {
@@ -44,6 +50,9 @@ class FileHandler
         }
     }
 
+    /**
+     * @throws FileNotClosedException
+     */
     public function close(): void
     {
         foreach ($this->files as $file) {
@@ -63,6 +72,9 @@ class FileHandler
         return iterator_to_array($this->getRows());
     }
 
+    /**
+     * @throws InvalidFileException
+     */
     private function getRows(): Generator
     {
         if (count($this->files) > 1) {
@@ -71,14 +83,27 @@ class FileHandler
 
         $file = $this->files[0];
         $headers = fgetcsv($file);
+
+        $this->isValidCsvFileFormat($headers);
+
+        $isEmptyFile = true;
         while (($row = fgetcsv($file)) !== false) {
+            $isEmptyFile = false;
+            $this->isValidCsvFileFormat($row);
             $item = array_combine($headers, $row);
             yield $item;
         }
         fclose($file);
+
+        if ($isEmptyFile) {
+            throw new InvalidFileException('invalid file format');
+        }
     }
 
 
+    /**
+     * @throws InvalidFileException
+     */
     private function search(string $keyword, string $column, string|null $format): bool|array
     {
         foreach ($this->getRows() as $row) {
@@ -87,5 +112,15 @@ class FileHandler
             }
         }
         return false;
+    }
+
+    /**
+     * @throws InvalidFileException
+     */
+    private function isValidCsvFileFormat(array|false $row): void
+    {
+        if (!$row || count($row) <= 1) {
+            throw new InvalidFileException('invalid file format');
+        }
     }
 }

@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
 use rcsofttech85\FileHandler\Exception\CouldNotWriteFileException;
 use rcsofttech85\FileHandler\Exception\FileNotFoundException;
+use rcsofttech85\FileHandler\Exception\InvalidFileException;
 use rcsofttech85\FileHandler\FileHandler;
 use TypeError;
 
@@ -132,6 +133,23 @@ class FileHandlerTest extends TestCase
     }
 
     #[Test]
+    #[DataProvider('fileProvider')]
+    public function throwErrorIfFileFormatIsInvalid(string $file)
+    {
+        $this->expectException(InvalidFileException::class);
+        $this->expectExceptionMessage('invalid file format');
+
+        try {
+            $this->fileHandler->open($file)->searchInCsvFile(
+                keyword: 'Twilight',
+                column: 'Summit'
+            );
+        } finally {
+            unlink($file);
+        }
+    }
+
+    #[Test]
     public function searchByKeywordAndReturnArray()
     {
         $expected = [
@@ -168,5 +186,21 @@ class FileHandlerTest extends TestCase
         yield ["The Ugly Truth"];
         yield ["Leap Year"];
         yield ["Twilight"];
+    }
+
+    public static function fileProvider(): iterable
+    {
+        $file1 = 'file1.txt';
+        $file2 = 'file2.txt';
+        $file3 = 'file3.txt';
+
+        file_put_contents($file1, "film,year");
+        file_put_contents($file2, "film\nyear");
+        file_put_contents($file3, "Film");
+
+
+        yield [$file1];
+        yield [$file2];
+        yield [$file3];
     }
 }
