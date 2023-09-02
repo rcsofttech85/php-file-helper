@@ -115,6 +115,8 @@ class FileHandlerTest extends TestCase
     {
         $data = $this->fileHandler->open(filename: 'movie.csv')->toArray();
 
+        print_r($data);
+
         $expected = [
             'Film' => 'Zack and Miri Make a Porno',
             'Genre' => 'Romance',
@@ -130,6 +132,7 @@ class FileHandlerTest extends TestCase
         $this->assertEquals($expected, $data[0]);
     }
 
+    #[Test]
     public function search_by_keyword_and_return_array()
     {
         $expected = [
