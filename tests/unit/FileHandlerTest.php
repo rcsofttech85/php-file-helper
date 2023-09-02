@@ -1,5 +1,7 @@
 <?php
 
+namespace unit;
+
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
@@ -7,10 +9,10 @@ use PHPUnit\Framework\TestCase;
 use rcsofttech85\FileHandler\Exception\CouldNotWriteFileException;
 use rcsofttech85\FileHandler\Exception\FileNotFoundException;
 use rcsofttech85\FileHandler\FileHandler;
+use TypeError;
 
 class FileHandlerTest extends TestCase
 {
-
     private FileHandler|null $fileHandler;
 
     protected function setUp(): void
@@ -31,7 +33,7 @@ class FileHandlerTest extends TestCase
 
 
     #[Test]
-    public function file_successfully_written()
+    public function fileSuccessfullyWritten()
     {
         $this->fileHandler->open(filename: 'file');
 
@@ -41,7 +43,7 @@ class FileHandlerTest extends TestCase
     }
 
     #[Test]
-    public function should_throw_exception_if_file_is_not_Found()
+    public function shouldThrowExceptionIfFileIsNotFound()
     {
         $this->expectException(FileNotFoundException::class);
         $this->expectExceptionMessage('File not found');
@@ -49,7 +51,7 @@ class FileHandlerTest extends TestCase
     }
 
     #[Test]
-    public function should_throw_exception_if_file_is_not_writable()
+    public function shouldThrowExceptionIfFileIsNotWritable()
     {
         $this->fileHandler->open(filename: 'file', mode: 'r');
 
@@ -59,7 +61,7 @@ class FileHandlerTest extends TestCase
     }
 
     #[Test]
-    public function multiple_file_can_be_written_simultaneously()
+    public function multipleFileCanBeWrittenSimultaneously()
     {
         $this->fileHandler->open(filename: 'file');
 
@@ -76,7 +78,7 @@ class FileHandlerTest extends TestCase
 
 
     #[Test]
-    public function file_is_closed_properly()
+    public function fileIsClosedProperly()
     {
         $this->fileHandler->open(filename: 'file');
         $this->fileHandler->write(data: "hello world");
@@ -87,9 +89,9 @@ class FileHandlerTest extends TestCase
     }
 
     #[Test]
-    #[DataProvider('provide_movie_names')]
+    #[DataProvider('provideMovieNames')]
     #[TestDox('search result with name $keyword exists in file.')]
-    public function result_found_for_exact_name_match(string $keyword)
+    public function resultFoundForExactNameMatch(string $keyword)
     {
         $isMovieAvailable = $this->fileHandler->open(filename: 'movie.csv')->searchInCsvFile(
             keyword: $keyword,
@@ -99,9 +101,9 @@ class FileHandlerTest extends TestCase
     }
 
     #[Test]
-    #[DataProvider('provide_studio_names')]
+    #[DataProvider('provideStudioNames')]
     #[TestDox('search result with name $keyword exists in file.')]
-    public function studio_is_found_for_exact_name_match(string $keyword)
+    public function studioIsFoundForExactNameMatch(string $keyword)
     {
         $isStudioFound = $this->fileHandler->open(filename: 'movie.csv')->searchInCsvFile(
             keyword: $keyword,
@@ -111,7 +113,7 @@ class FileHandlerTest extends TestCase
     }
 
     #[Test]
-    public function to_array_method_returns_valid_array()
+    public function toArrayMethodReturnsValidArray()
     {
         $data = $this->fileHandler->open(filename: 'movie.csv')->toArray();
         $expected = [
@@ -130,7 +132,7 @@ class FileHandlerTest extends TestCase
     }
 
     #[Test]
-    public function search_by_keyword_and_return_array()
+    public function searchByKeywordAndReturnArray()
     {
         $expected = [
             'Film' => 'Zack and Miri Make a Porno',
@@ -153,7 +155,7 @@ class FileHandlerTest extends TestCase
         $this->assertEquals($expected, $data);
     }
 
-    public static function provide_studio_names(): iterable
+    public static function provideStudioNames(): iterable
     {
         yield ["Fox"];
         yield ["Universal"];
@@ -161,11 +163,10 @@ class FileHandlerTest extends TestCase
     }
 
 
-    public static function provide_movie_names(): iterable
+    public static function provideMovieNames(): iterable
     {
         yield ["The Ugly Truth"];
         yield ["Leap Year"];
         yield ["Twilight"];
     }
-
 }
