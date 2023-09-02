@@ -53,7 +53,7 @@ class FileHandler
         }
     }
 
-    public function searchInCsvFile(string $keyword, string $column, string|null $format = null): bool
+    public function searchInCsvFile(string $keyword, string $column, string|null $format = null): bool|array
     {
         return $this->search($keyword, $column, $format);
     }
@@ -83,7 +83,7 @@ class FileHandler
     {
         foreach ($this->getRows() as $row) {
             if ($keyword === $row[$column]) {
-                return ($format === self::ARRAY_FORMAT) ? $row[$column] : true;
+                return ($format === self::ARRAY_FORMAT) ? $row : true;
             }
         }
         return false;
