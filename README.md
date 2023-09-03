@@ -78,3 +78,25 @@ $data[0] = [
         ];
 
 ```
+
+**Encrypt a file**
+
+```
+
+$secret = getenv('SECRET_KEY');
+
+$fileEncryptor = new FileEncryptor('movie.csv', $secret);
+$fileEncryptor->encryptFile();
+
+```
+
+**Decrypt a file**
+
+```
+
+$secret = getenv('SECRET_KEY');
+
+$fileEncryptor = new FileEncryptor('movie.csv', $secret);
+$fileEncryptor->decryptFile();
+
+```
