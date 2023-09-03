@@ -9,8 +9,10 @@ use SodiumException;
 
 class FileEncryptor
 {
-    public function __construct(public readonly string $filename, #[SensitiveParameter] public readonly string $secret)
-    {
+    public function __construct(
+        private readonly string $filename,
+        #[SensitiveParameter] private readonly string $secret
+    ) {
     }
 
     /**
