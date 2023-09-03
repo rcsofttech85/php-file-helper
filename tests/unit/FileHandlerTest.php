@@ -140,6 +140,17 @@ class FileHandlerTest extends TestCase
         $this->assertEquals($expected, $data[0]);
     }
 
+    #[Test]
+    public function toJsonMethodReturnsValidJsonFormat()
+    {
+        $jsonData = $this->fileHandler->open(filename: 'movie.csv')->toJson();
+
+        $expectedData = '[{"Film":"Zack and Miri Make a Porno","Genre":"Romance","Lead Studio":"The Weinstein Company","Audience score %":"70","Profitability":"1.747541667","Rotten Tomatoes %":"64","Worldwide Gross":"$41.94 ","Year":"2008"},{"Film":"Youth in Revolt","Genre":"Comedy","Lead Studio":"The Weinstein Company","Audience score %":"52","Profitability":"1.09","Rotten Tomatoes %":"68","Worldwide Gross":"$19.62 ","Year":"2010"},{"Film":"Twilight","Genre":"Romance","Lead Studio":"Independent","Audience score %":"68","Profitability":"6.383363636","Rotten Tomatoes %":"26","Worldwide Gross":"$702.17 ","Year":"2011"}]';
+
+        $this->assertJson($jsonData);
+        $this->assertJsonStringEqualsJsonString($expectedData, $jsonData);
+    }
+
 
     #[Test]
     public function searchByKeywordAndReturnArray()

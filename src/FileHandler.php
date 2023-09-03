@@ -67,9 +67,23 @@ class FileHandler
         return $this->search($keyword, $column, $format);
     }
 
+    /**
+     * @throws InvalidFileException
+     */
     public function toArray(): array
     {
         return iterator_to_array($this->getRows());
+    }
+
+
+    /**
+     * @throws InvalidFileException
+     */
+    public function toJson(): string
+    {
+        $data = $this->toArray();
+
+        return json_encode($data);
     }
 
     /**
