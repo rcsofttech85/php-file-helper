@@ -10,6 +10,8 @@
 
 ==========================================
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9d587dcefb54449c999677d6957101b6)](https://app.codacy.com/gh/rcsofttech85/php-file-helper?utm_source=github.com&utm_medium=referral&utm_content=rcsofttech85/php-file-helper&utm_campaign=Badge_Grade)
+
 
 **search by a keyword in file**
 
