@@ -22,6 +22,13 @@ class FileHandlerTest extends TestCase
 
         $this->fileHandler = new FileHandler();
         fopen(filename: "file", mode: "w");
+
+        $content = "Film,Genre,Lead Studio,Audience score %,Profitability,Rotten Tomatoes %,Worldwide Gross,Year\n"
+            . "Zack and Miri Make a Porno,Romance,The Weinstein Company,70,1.747541667,64,$41.94 ,2008\n"
+            . "Youth in Revolt,Comedy,The Weinstein Company,52,1.09,68,$19.62 ,2010\n"
+            . "Twilight,Romance,Independent,68,6.383363636,26,$702.17 ,2011";
+
+        file_put_contents('movie.csv', $content);
     }
 
     protected function tearDown(): void
@@ -30,6 +37,7 @@ class FileHandlerTest extends TestCase
 
         $this->fileHandler = null;
         unlink(filename: "file");
+        unlink(filename: "movie.csv");
     }
 
 
@@ -132,22 +140,6 @@ class FileHandlerTest extends TestCase
         $this->assertEquals($expected, $data[0]);
     }
 
-    #[Test]
-    #[DataProvider('fileProvider')]
-    public function throwErrorIfFileFormatIsInvalid(string $file)
-    {
-        $this->expectException(InvalidFileException::class);
-        $this->expectExceptionMessage('invalid file format');
-
-        try {
-            $this->fileHandler->open($file)->searchInCsvFile(
-                keyword: 'Twilight',
-                column: 'Summit'
-            );
-        } finally {
-            unlink($file);
-        }
-    }
 
     #[Test]
     public function searchByKeywordAndReturnArray()
@@ -173,18 +165,36 @@ class FileHandlerTest extends TestCase
         $this->assertEquals($expected, $data);
     }
 
+    #[Test]
+    #[DataProvider('fileProvider')]
+    public function throwErrorIfFileFormatIsInvalid(string $file)
+    {
+        $this->expectException(InvalidFileException::class);
+        $this->expectExceptionMessage('invalid file format');
+
+        try {
+            $this->fileHandler->open($file)->searchInCsvFile(
+                keyword: 'Twilight',
+                column: 'Summit'
+            );
+        } finally {
+            unlink($file);
+        }
+    }
+
+    //  Data Providers
+
     public static function provideStudioNames(): iterable
     {
-        yield ["Fox"];
-        yield ["Universal"];
-        yield ["Warner Bros."];
+        yield ["The Weinstein Company"];
+        yield ["Independent"];
     }
 
 
     public static function provideMovieNames(): iterable
     {
-        yield ["The Ugly Truth"];
-        yield ["Leap Year"];
+        yield ["Zack and Miri Make a Porno"];
+        yield ["Youth in Revolt"];
         yield ["Twilight"];
     }
 
