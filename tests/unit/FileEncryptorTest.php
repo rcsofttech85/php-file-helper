@@ -6,13 +6,20 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use rcsofttech85\FileHandler\FileEncryptor;
 use SodiumException;
+use Symfony\Component\Dotenv\Dotenv;
 
 class FileEncryptorTest extends TestCase
 {
     private FileEncryptor|null $fileEncryptor;
 
+    private static string $secret;
+
+
     public static function setUpBeforeClass(): void
     {
+        $dotenv = new Dotenv();
+        $dotenv->load('.env');
+        self::$secret = getenv('SECRET_KEY');
         $content = "Film,Genre,Lead Studio,Audience score %,Profitability,Rotten Tomatoes %,Worldwide Gross,Year\n"
             . "Zack and Miri Make a Porno,Romance,The Weinstein Company,70,1.747541667,64,$41.94 ,2008\n"
             . "Youth in Revolt,Comedy,The Weinstein Company,52,1.09,68,$19.62 ,2010\n"
@@ -55,7 +62,7 @@ class FileEncryptorTest extends TestCase
     #[Test]
     public function throwExceptionIfDecryptionFails()
     {
-        $this->fileEncryptor = new FileEncryptor("movie.csv", "rahuls");
+        $this->fileEncryptor = new FileEncryptor("movie.csv", 'wrongSecret');
         $this->expectException(SodiumException::class);
         $this->expectExceptionMessage('could not decrypt file');
         $this->fileEncryptor->decryptFile();
@@ -71,7 +78,7 @@ class FileEncryptorTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->fileEncryptor = new FileEncryptor('movie.csv', 'rahul');
+        $this->fileEncryptor = new FileEncryptor('movie.csv', self::$secret);
         parent::setUp();
     }
 
