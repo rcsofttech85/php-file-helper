@@ -11,6 +11,13 @@
 
 ==========================================
 
+**Installation**
+
+```
+composer require rcsofttech85/file-handler
+
+```
+
 
 **search by a keyword in file**
 
