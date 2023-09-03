@@ -111,3 +111,13 @@ $fileEncryptor = new FileEncryptor('movie.csv', $secret);
 $fileEncryptor->decryptFile();
 
 ```
+
+**Streaming and Saving Content from URL to File**
+
+```
+
+ $url = "https://gist.github.com/rcsofttech85/629b37d483c4796db7bdcb3704067631#file-gistfile1-txt";
+ $stream = new Stream($url, "outputFile.html");
+ $stream->startStreaming();
+
+```
