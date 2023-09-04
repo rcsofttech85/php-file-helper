@@ -17,16 +17,33 @@ class FileHandlerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
         $this->fileHandler = new FileHandler();
-        fopen(filename: "file", mode: "w");
+    }
 
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
         $content = "Film,Genre,Lead Studio,Audience score %,Profitability,Rotten Tomatoes %,Worldwide Gross,Year\n"
             . "Zack and Miri Make a Porno,Romance,The Weinstein Company,70,1.747541667,64,$41.94 ,2008\n"
             . "Youth in Revolt,Comedy,The Weinstein Company,52,1.09,68,$19.62 ,2010\n"
             . "Twilight,Romance,Independent,68,6.383363636,26,$702.17 ,2011";
 
+        fopen(filename: "file", mode: "w");
+        fopen(filename: "file1", mode: "w");
         file_put_contents('movie.csv', $content);
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        parent::tearDownAfterClass();
+
+        $files = ["file", "movie.csv", 'file1'];
+
+        foreach ($files as $file) {
+            if (file_exists($file)) {
+                unlink(filename: $file);
+            }
+        }
     }
 
     protected function tearDown(): void
@@ -34,8 +51,6 @@ class FileHandlerTest extends TestCase
         parent::tearDown();
 
         $this->fileHandler = null;
-        unlink(filename: "file");
-        unlink(filename: "movie.csv");
     }
 
 
@@ -67,22 +82,6 @@ class FileHandlerTest extends TestCase
         $this->fileHandler->write(data: "hello world");
     }
 
-    #[Test]
-    public function multipleFileCanBeWrittenSimultaneously()
-    {
-        $this->fileHandler->open(filename: 'file');
-
-        $this->fileHandler->open(filename: 'file1', mode: 'w');
-
-        $this->fileHandler->write(data: "hello world");
-
-        $this->assertEquals("hello world", file_get_contents(filename: 'file'));
-
-        $this->assertEquals("hello world", file_get_contents(filename: 'file1'));
-
-        unlink("file1");
-    }
-
 
     #[Test]
     public function fileIsClosedProperly()
@@ -94,6 +93,22 @@ class FileHandlerTest extends TestCase
         $this->expectException(TypeError::class);
         $this->fileHandler->write(data: "fwrite(): supplied resource is not a valid stream resource");
     }
+
+
+    #[Test]
+    public function multipleFileCanBeWrittenSimultaneously()
+    {
+        $this->fileHandler->open(filename: 'file');
+
+        $this->fileHandler->open(filename: 'file1');
+
+        $this->fileHandler->write(data: "hello world");
+
+        $this->assertEquals("hello world", file_get_contents(filename: 'file'));
+
+        $this->assertEquals("hello world", file_get_contents(filename: 'file1'));
+    }
+
 
     #[Test]
     #[DataProvider('provideMovieNames')]

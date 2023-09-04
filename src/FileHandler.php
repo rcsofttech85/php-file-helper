@@ -83,13 +83,15 @@ class FileHandler
         return json_encode($data);
     }
 
-    public function delete()
+    /**
+     * @throws FileHandlerException
+     */
+    public function delete(string $filename): void
     {
-        foreach ($this->files as $file) {
-            if (!unlink($file)) {
-                throw new FileHandlerException('could not delete file');
-            }
+        if (!file_exists($filename)) {
+            throw new FileHandlerException('file does not exists');
         }
+        unlink($filename);
     }
 
     /**
@@ -119,7 +121,6 @@ class FileHandler
             throw new FileHandlerException('invalid file format');
         }
     }
-
 
     /**
      * @throws FileHandlerException
