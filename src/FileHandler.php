@@ -39,11 +39,9 @@ class FileHandler
     {
         foreach ($this->files as $file) {
             $byteWritten = fwrite($file, $data, $length);
-            if ($byteWritten !== false) {
-                continue;
+            if (!$byteWritten) {
+                throw new FileHandlerException('Error writing to file');
             }
-
-            throw new FileHandlerException('Error writing to file');
         }
     }
 
