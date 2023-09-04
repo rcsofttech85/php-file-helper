@@ -4,6 +4,7 @@ namespace rcsofttech85\FileHandler;
 
 use Generator;
 use rcsofttech85\FileHandler\Exception\FileHandlerException;
+use ZipArchive;
 
 class FileHandler
 {
@@ -43,6 +44,29 @@ class FileHandler
                 throw new FileHandlerException('Error writing to file');
             }
         }
+    }
+
+    /**
+     * @throws FileHandlerException
+     */
+    public function compress(string $filename, string $zipFilename): void
+    {
+        if (!file_exists($filename)) {
+            throw new FileHandlerException('File to compress does not exist.');
+        }
+
+        $zip = new ZipArchive();
+
+        if (!$zip->open($zipFilename, ZipArchive::CREATE)) {
+            throw new FileHandlerException('Failed to create the ZIP archive.');
+        }
+
+        if (!$zip->addFile($filename)) {
+            throw new FileHandlerException('Failed to add the file to the ZIP archive.');
+        }
+
+
+        $zip->close();
     }
 
     /**
