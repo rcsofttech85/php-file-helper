@@ -3,31 +3,33 @@
 namespace rcsofttech85\FileHandler;
 
 use Exception;
-use rcsofttech85\FileHandler\Exception\FileNotFoundException;
+use rcsofttech85\FileHandler\Exception\FileEncryptorException;
 use SensitiveParameter;
 use SodiumException;
 
-class FileEncryptor
+readonly class FileEncryptor
 {
     public function __construct(
-        private readonly string $filename,
-        #[SensitiveParameter] private readonly string $secret
+        private string $filename,
+        #[SensitiveParameter] private string $secret
     ) {
     }
 
     /**
-     * @throws SodiumException
+     *
+     * @throws FileEncryptorException
      * @throws Exception
+     *
      */
     public function encryptFile(): bool
     {
         $plainText = file_get_contents($this->filename);
 
         if (!$plainText) {
-            throw new FileNotFoundException('File not found or has no content');
+            throw new FileEncryptorException('File not found or has no content');
         }
         if (ctype_xdigit($plainText)) {
-            throw new SodiumException('file is already encrypted');
+            throw new FileEncryptorException('file is already encrypted');
         }
 
 
@@ -53,18 +55,21 @@ class FileEncryptor
     }
 
     /**
+     *
+     * @throws FileEncryptorException
      * @throws SodiumException
+     *
      */
     public function decryptFile(): bool
     {
         $encryptedData = file_get_contents($this->filename);
 
         if (!$encryptedData) {
-            throw new FileNotFoundException('File not found or has no content');
+            throw new FileEncryptorException('File not found or has no content');
         }
 
         if (!ctype_xdigit($encryptedData)) {
-            throw new SodiumException('file is not encrypted');
+            throw new FileEncryptorException('file is not encrypted');
         }
 
         $bytes = hex2bin($encryptedData);
@@ -76,7 +81,7 @@ class FileEncryptor
         $plaintext = sodium_crypto_secretbox_open($ciphertext, $nonce, $key);
 
         if (!$plaintext) {
-            throw new SodiumException('could not decrypt file');
+            throw new FileEncryptorException('could not decrypt file');
         }
 
 

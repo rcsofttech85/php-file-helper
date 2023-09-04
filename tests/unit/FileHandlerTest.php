@@ -6,9 +6,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
-use rcsofttech85\FileHandler\Exception\CouldNotWriteFileException;
-use rcsofttech85\FileHandler\Exception\FileNotFoundException;
-use rcsofttech85\FileHandler\Exception\InvalidFileException;
+use rcsofttech85\FileHandler\Exception\FileHandlerException;
 use rcsofttech85\FileHandler\FileHandler;
 use TypeError;
 
@@ -54,7 +52,7 @@ class FileHandlerTest extends TestCase
     #[Test]
     public function shouldThrowExceptionIfFileIsNotFound()
     {
-        $this->expectException(FileNotFoundException::class);
+        $this->expectException(FileHandlerException::class);
         $this->expectExceptionMessage('File not found');
         $this->fileHandler->open(filename: 'unknown');
     }
@@ -64,7 +62,7 @@ class FileHandlerTest extends TestCase
     {
         $this->fileHandler->open(filename: 'file', mode: 'r');
 
-        $this->expectException(CouldNotWriteFileException::class);
+        $this->expectException(FileHandlerException::class);
         $this->expectExceptionMessage('Error writing to file');
         $this->fileHandler->write(data: "hello world");
     }
@@ -180,7 +178,7 @@ class FileHandlerTest extends TestCase
     #[DataProvider('fileProvider')]
     public function throwErrorIfFileFormatIsInvalid(string $file)
     {
-        $this->expectException(InvalidFileException::class);
+        $this->expectException(FileHandlerException::class);
         $this->expectExceptionMessage('invalid file format');
 
         try {

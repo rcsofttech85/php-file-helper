@@ -3,10 +3,7 @@
 namespace rcsofttech85\FileHandler;
 
 use Generator;
-use rcsofttech85\FileHandler\Exception\CouldNotWriteFileException;
-use rcsofttech85\FileHandler\Exception\FileNotClosedException;
-use rcsofttech85\FileHandler\Exception\FileNotFoundException;
-use rcsofttech85\FileHandler\Exception\InvalidFileException;
+use rcsofttech85\FileHandler\Exception\FileHandlerException;
 
 class FileHandler
 {
@@ -15,7 +12,7 @@ class FileHandler
     private array $files = [];
 
     /**
-     * @throws FileNotFoundException
+     * @throws FileHandlerException
      */
     public function open(
         string $filename,
@@ -26,7 +23,7 @@ class FileHandler
         $file = fopen($filename, $mode, $include_path, $context);
 
         if (!$file) {
-            throw new FileNotFoundException();
+            throw new FileHandlerException('File not found');
         }
 
         $this->files[] = $file;
@@ -36,7 +33,7 @@ class FileHandler
 
 
     /**
-     * @throws CouldNotWriteFileException
+     * @throws FileHandlerException
      */
     public function write(string $data, ?int $length = null): void
     {
@@ -46,18 +43,18 @@ class FileHandler
                 continue;
             }
 
-            throw new CouldNotWriteFileException();
+            throw new FileHandlerException('Error writing to file');
         }
     }
 
     /**
-     * @throws FileNotClosedException
+     * @throws FileHandlerException
      */
     public function close(): void
     {
         foreach ($this->files as $file) {
             if (!fclose($file)) {
-                throw new FileNotClosedException();
+                throw new FileHandlerException('file was not closed');
             }
         }
     }
@@ -68,7 +65,7 @@ class FileHandler
     }
 
     /**
-     * @throws InvalidFileException
+     * @throws FileHandlerException
      */
     public function toArray(): array
     {
@@ -77,7 +74,7 @@ class FileHandler
 
 
     /**
-     * @throws InvalidFileException
+     * @throws FileHandlerException
      */
     public function toJson(): string
     {
@@ -86,13 +83,22 @@ class FileHandler
         return json_encode($data);
     }
 
+    public function delete()
+    {
+        foreach ($this->files as $file) {
+            if (!unlink($file)) {
+                throw new FileHandlerException('could not delete file');
+            }
+        }
+    }
+
     /**
-     * @throws InvalidFileException
+     * @throws FileHandlerException
      */
     private function getRows(): Generator
     {
         if (count($this->files) > 1) {
-            throw new InvalidFileException("multiple files not allowed");
+            throw new FileHandlerException("multiple files not allowed");
         }
 
         $file = $this->files[0];
@@ -110,13 +116,13 @@ class FileHandler
         fclose($file);
 
         if ($isEmptyFile) {
-            throw new InvalidFileException('invalid file format');
+            throw new FileHandlerException('invalid file format');
         }
     }
 
 
     /**
-     * @throws InvalidFileException
+     * @throws FileHandlerException
      */
     private function search(string $keyword, string $column, string|null $format): bool|array
     {
@@ -129,12 +135,12 @@ class FileHandler
     }
 
     /**
-     * @throws InvalidFileException
+     * @throws FileHandlerException
      */
     private function isValidCsvFileFormat(array|false $row): void
     {
         if (!$row || count($row) <= 1) {
-            throw new InvalidFileException('invalid file format');
+            throw new FileHandlerException('invalid file format');
         }
     }
 }

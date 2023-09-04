@@ -4,8 +4,8 @@ namespace unit;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use rcsofttech85\FileHandler\Exception\FileEncryptorException;
 use rcsofttech85\FileHandler\FileEncryptor;
-use SodiumException;
 use Symfony\Component\Dotenv\Dotenv;
 
 class FileEncryptorTest extends TestCase
@@ -38,7 +38,7 @@ class FileEncryptorTest extends TestCase
     #[Test]
     public function throwExceptionOnDecryptingNonEncryptedFile()
     {
-        $this->expectException(SodiumException::class);
+        $this->expectException(FileEncryptorException::class);
         $this->expectExceptionMessage('file is not encrypted');
         $this->fileEncryptor->decryptFile();
     }
@@ -54,7 +54,7 @@ class FileEncryptorTest extends TestCase
     #[Test]
     public function throwExceptionIfAlreadyEncrypted()
     {
-        $this->expectException(SodiumException::class);
+        $this->expectException(FileEncryptorException::class);
         $this->expectExceptionMessage('file is already encrypted');
         $this->fileEncryptor->encryptFile();
     }
@@ -63,7 +63,7 @@ class FileEncryptorTest extends TestCase
     public function throwExceptionIfDecryptionFails()
     {
         $this->fileEncryptor = new FileEncryptor("movie.csv", 'wrongSecret');
-        $this->expectException(SodiumException::class);
+        $this->expectException(FileEncryptorException::class);
         $this->expectExceptionMessage('could not decrypt file');
         $this->fileEncryptor->decryptFile();
     }

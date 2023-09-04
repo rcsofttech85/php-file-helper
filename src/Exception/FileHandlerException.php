@@ -5,9 +5,9 @@ namespace rcsofttech85\FileHandler\Exception;
 use Exception;
 use Throwable;
 
-class CouldNotWriteFileException extends Exception
+class FileHandlerException extends Exception
 {
-    public function __construct($message = "Error writing to file", $code = 0, Throwable $previous = null)
+    public function __construct($message = "There was an error", $code = 0, Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }
