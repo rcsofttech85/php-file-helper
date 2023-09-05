@@ -1,12 +1,14 @@
 <?php
 
-namespace unit;
+namespace Integration;
 
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use rcsofttech85\FileHandler\Exception\StreamException;
 use rcsofttech85\FileHandler\Stream;
 
+#[Group("integration")]
 class StreamTest extends TestCase
 {
     public static function setUpBeforeClass(): void
