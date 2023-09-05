@@ -2,7 +2,6 @@
 
 namespace unit;
 
-use finfo;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
@@ -135,6 +134,7 @@ class FileHandlerTest extends TestCase
         $this->assertTrue($isStudioFound);
     }
 
+
     #[Test]
     public function successfulCompression()
     {
@@ -143,11 +143,20 @@ class FileHandlerTest extends TestCase
 
         $this->fileHandler->compress($testFile, $compressedZipFilename);
 
-        $fileInfo = new finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $fileInfo->file($compressedZipFilename);
+        $mimeType = $this->fileHandler->getMimeType($compressedZipFilename);
 
         $this->assertFileExists($compressedZipFilename);
         $this->assertEquals('application/zip', $mimeType);
+    }
+
+    #[Test]
+    public function getMimeTypeFunctionReturnsCorrectInfo()
+    {
+        $csvFile = $this->fileHandler->getMimeType("movie.csv");
+        $zipFile = $this->fileHandler->getMimeType("compressed.zip");
+
+        $this->assertEquals("text/csv", $csvFile);
+        $this->assertEquals('application/zip', $zipFile);
     }
 
     #[Test]
