@@ -2,6 +2,7 @@
 
 namespace rcsofttech85\FileHandler;
 
+use finfo;
 use Generator;
 use rcsofttech85\FileHandler\Exception\FileHandlerException;
 use ZipArchive;
@@ -67,6 +68,24 @@ class FileHandler
 
 
         $zip->close();
+    }
+
+    /**
+     * @throws FileHandlerException
+     */
+    public function getMimeType(string $filename): string
+    {
+        if (!file_exists($filename)) {
+            throw new FileHandlerException('file does not exist.');
+        }
+
+        $fileInfo = new finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $fileInfo->file($filename);
+        if (!$mimeType) {
+            throw new FileHandlerException('unknown mime type');
+        }
+
+        return $mimeType;
     }
 
     /**
