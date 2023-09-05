@@ -148,8 +148,27 @@ class FileHandlerTest extends TestCase
 
         $this->assertFileExists($compressedZipFilename);
         $this->assertEquals('application/zip', $mimeType);
+    }
+
+    #[Test]
+    public function successfulDecompression()
+    {
+        $compressedZipFilename = 'compressed.zip';
+        $extractPath = 'extracted_contents';
+
+        $this->fileHandler->decompress($compressedZipFilename, $extractPath);
+
+        $expectedContent = "Film,Genre,Lead Studio,Audience score %,Profitability,Rotten Tomatoes %,Worldwide Gross,Year\n"
+            . "Zack and Miri Make a Porno,Romance,The Weinstein Company,70,1.747541667,64,$41.94 ,2008\n"
+            . "Youth in Revolt,Comedy,The Weinstein Company,52,1.09,68,$19.62 ,2010\n"
+            . "Twilight,Romance,Independent,68,6.383363636,26,$702.17 ,2011";
+
+        $this->assertEquals($expectedContent, file_get_contents("./extracted_contents/movie.csv"));
+
 
         unlink($compressedZipFilename);
+        unlink("./extracted_contents/movie.csv");
+        rmdir($extractPath);
     }
 
     #[Test]

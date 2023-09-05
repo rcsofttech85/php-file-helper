@@ -72,6 +72,28 @@ class FileHandler
     /**
      * @throws FileHandlerException
      */
+    public function decompress(string $zipFilename, string $extractPath = "./"): void
+    {
+        if (!file_exists($zipFilename)) {
+            throw new FileHandlerException('ZIP archive does not exist.');
+        }
+
+        $zip = new ZipArchive();
+
+        if (!$zip->open($zipFilename)) {
+            throw new FileHandlerException('Failed to open the ZIP archive.');
+        }
+
+        if (!$zip->extractTo($extractPath)) {
+            throw new FileHandlerException('Failed to extract the ZIP archive.');
+        }
+
+        $zip->close();
+    }
+
+    /**
+     * @throws FileHandlerException
+     */
     public function close(): void
     {
         foreach ($this->files as $file) {
