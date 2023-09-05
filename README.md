@@ -130,3 +130,27 @@ $fileEncryptor->decryptFile();
  $stream->startStreaming();
 
 ```
+
+**File Compression**
+
+```
+
+        $testFile = 'movie.csv';
+        $compressedZipFilename = 'compressed.zip';
+
+        $this->fileHandler->compress($testFile, $compressedZipFilename);
+
+```
+
+**File Decompression**
+
+```
+
+        $compressedZipFilename = 'compressed.zip';
+        $extractPath = 'extracted_contents';
+
+        $this->fileHandler->decompress($compressedZipFilename, $extractPath);
+
+```
+
+
