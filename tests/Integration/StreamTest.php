@@ -59,6 +59,4 @@ class StreamTest extends TestCase
     {
         yield ["output.html", "https://gist.github"];
     }
-
-
 }

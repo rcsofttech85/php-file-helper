@@ -1,0 +1,77 @@
+#!/usr/bin/env php
+<?php
+
+require 'vendor/autoload.php';
+
+
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\SingleCommandApplication;
+use Symfony\Component\Console\Style\SymfonyStyle;
+
+
+$command = (new SingleCommandApplication(name: 'file-diff'))
+    ->addArgument('oldFile', InputArgument::REQUIRED, 'old file name')
+    ->addArgument('newFile', InputArgument::REQUIRED, 'new file name')
+    ->setCode(function (InputInterface $input, OutputInterface $output): int {
+        $io = new SymfonyStyle($input, $output);
+        $oldFile = $input->getArgument('oldFile');
+        $newFile = $input->getArgument("newFile");
+
+        if (!file_exists($oldFile) || !file_exists($newFile)) {
+            $io->error("file does not exists");
+            return Command::FAILURE;
+        }
+
+        fileDiff($oldFile, $newFile);
+        return Command::SUCCESS;
+    })->run();
+
+
+function fileDiff($oldFilePath, $newFilePath)
+{
+    $oldLines = file($oldFilePath, FILE_IGNORE_NEW_LINES);
+    $newLines = file($newFilePath, FILE_IGNORE_NEW_LINES);
+
+
+    $oldLineCount = count($oldLines);
+    $newLineCount = count($newLines);
+
+
+    $maxLineCount = max($oldLineCount, $newLineCount);
+
+    $changes = [];
+    for ($i = 0; $i < $maxLineCount; $i++) {
+        $oldLine = $i < $oldLineCount ? $oldLines[$i] : null;
+        $newLine = $i < $newLineCount ? $newLines[$i] : null;
+
+        if ($oldLine === $newLine) {
+            continue;
+        }
+
+        $colorGreen = "\e[32m";
+        $colorRed = "\e[31m";
+        $colorReset = "\e[0m";
+
+
+        $oldLineNumber = $i + 1;
+        $newLineNumber = $i + 1;
+
+
+        $changes[] = ($oldLine === null ? "$colorGreen+ New (Line $newLineNumber): " : "$colorRed- Old (Line $oldLineNumber): ") . ($oldLine ?? $newLine) . "$colorReset";
+
+        if ($oldLine !== null && $newLine !== null) {
+            $changes[] = "$colorGreen+ New (Line $newLineNumber): " . $newLine . "$colorReset";
+        }
+    }
+
+
+    $console = fopen("php://stdout", "w");
+    foreach ($changes as $change) {
+        fwrite($console, $change . PHP_EOL);
+    }
+
+    fclose($console);
+}
