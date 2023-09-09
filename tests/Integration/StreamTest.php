@@ -2,6 +2,7 @@
 
 namespace Integration;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -15,34 +16,49 @@ class StreamTest extends TestCase
     {
         parent::setUpBeforeClass();
 
-        fopen("outputFile.html", "w");
+        fopen("output.html", "w");
     }
 
     public static function tearDownAfterClass(): void
     {
         parent::tearDownAfterClass();
-        unlink("outputFile.html");
+        unlink("output.html");
     }
 
     #[Test]
-    public function streamAndWriteToFile()
+    #[DataProvider('streamDataProvider')]
+    public function streamAndWriteToFile($output, $url)
     {
-        $url = "https://gist.github.com/rcsofttech85/629b37d483c4796db7bdcb3704067631#file-gistfile1-txt";
-        $stream = new Stream($url, "outputFile.html");
+        $stream = new Stream($url, $output);
         $stream->startStreaming();
 
-        $this->assertGreaterThan(0, filesize("outputFile.html"));
-        $this->assertStringContainsString('<!DOCTYPE html>', file_get_contents("outputFile.html"));
-        $this->assertStringContainsString('</html>', file_get_contents("outputFile.html"));
+        $this->assertGreaterThan(0, filesize($output));
+        $this->assertStringContainsString('<!DOCTYPE html>', file_get_contents($output));
+        $this->assertStringContainsString('</html>', file_get_contents($output));
     }
 
     #[Test]
-    public function throwExceptionIfUrlIsInvalid()
+    #[DataProvider('wrongStreamDataProvider')]
+    public function throwExceptionIfUrlIsInvalid($output, $url)
     {
-        $url = "https://gist.github";
-        $stream = new Stream($url, "outputFile.html");
+        $stream = new Stream($url, $output);
 
         $this->expectException(StreamException::class);
         $stream->startStreaming();
     }
+
+    public static function streamDataProvider(): iterable
+    {
+        yield [
+            "output.html",
+            "https://gist.github.com/rcsofttech85/629b37d483c4796db7bdcb3704067631#file-gistfile1-txt"
+        ];
+    }
+
+    public static function wrongStreamDataProvider(): iterable
+    {
+        yield ["output.html", "https://gist.github"];
+    }
+
+
 }
