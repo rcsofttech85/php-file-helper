@@ -25,8 +25,8 @@ class FileDiffCommandTest extends TestCase
         file_put_contents("new", "this line has same old code" . PHP_EOL, FILE_APPEND);
 
 
-        yield ['old', 'new', 'Old (Line 1):'];
-        yield ['old', 'new', 'Old (Line 2):'];
+        yield ['old', 'new', 'old (Line 1):'];
+        yield ['old', 'new', 'old (Line 2):'];
     }
 
     public static function matchingDataProvider(): iterable
@@ -35,7 +35,7 @@ class FileDiffCommandTest extends TestCase
         file_put_contents("new", "this has matching content" . PHP_EOL, FILE_APPEND);
 
 
-        yield ['old', 'new', 'Old (Line 3):'];
+        yield ['old', 'new', 'old (Line 3):'];
     }
 
     #[Test]

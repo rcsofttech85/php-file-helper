@@ -60,10 +60,10 @@ function fileDiff($oldFilePath, $newFilePath)
         $newLineNumber = $i + 1;
 
 
-        $changes[] = ($oldLine === null ? "$colorGreen+ New (Line $newLineNumber): " : "$colorRed- Old (Line $oldLineNumber): ") . ($oldLine ?? $newLine) . "$colorReset";
+        $changes[] = ($oldLine === null ? "$colorGreen+ $newFilePath (Line $newLineNumber): " : "$colorRed- $oldFilePath (Line $oldLineNumber): ") . ($oldLine ?? $newLine) . "$colorReset";
 
         if ($oldLine !== null && $newLine !== null) {
-            $changes[] = "$colorGreen+ New (Line $newLineNumber): " . $newLine . "$colorReset";
+            $changes[] = "$colorGreen+ $newFilePath (Line $newLineNumber): " . $newLine . "$colorReset";
         }
     }
 
