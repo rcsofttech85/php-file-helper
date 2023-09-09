@@ -153,4 +153,12 @@ $fileEncryptor->decryptFile();
 
 ```
 
+**File Difference**
+
+```
+vendor/bin/file-diff oldFile newFile
+
+```
+
+
 
