@@ -13,6 +13,9 @@ readonly class FileEncryptor
         private string $filename,
         #[SensitiveParameter] private string $secret
     ) {
+        if (!file_exists($this->filename)) {
+            throw new FileEncryptorException("File not found");
+        }
     }
 
     /**
@@ -26,7 +29,7 @@ readonly class FileEncryptor
         $plainText = file_get_contents($this->filename);
 
         if (!$plainText) {
-            throw new FileEncryptorException('File not found or has no content');
+            throw new FileEncryptorException('File has no content');
         }
         if (ctype_xdigit($plainText)) {
             throw new FileEncryptorException('file is already encrypted');
@@ -65,7 +68,7 @@ readonly class FileEncryptor
         $encryptedData = file_get_contents($this->filename);
 
         if (!$encryptedData) {
-            throw new FileEncryptorException('File not found or has no content');
+            throw new FileEncryptorException('File has no content');
         }
 
         if (!ctype_xdigit($encryptedData)) {
