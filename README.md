@@ -1,4 +1,5 @@
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a4ff2820492d4978a2a113826a344dac)](https://app.codacy.com/gh/rcsofttech85/php-file-helper?utm_source=github.com&utm_medium=referral&utm_content=rcsofttech85/php-file-helper&utm_campaign=Badge_Grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c6450a9c0f99488e93b34911f1adfb2e)](https://app.codacy.com/gh/rcsofttech85/php-file-helper/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/c6450a9c0f99488e93b34911f1adfb2e)](https://app.codacy.com/gh/rcsofttech85/php-file-helper/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 
