@@ -32,7 +32,8 @@ class StreamHandlerTest extends TestCase
         $stream = new StreamHandler($urls);
         $stream->initiateConcurrentStreams()->start()->resume();
 
-        foreach ($urls as $file => $url) {
+        $files = array_keys($urls);
+        foreach ($files as $file) {
             $this->assertGreaterThan(0, filesize($file));
             $this->assertStringContainsString('<!DOCTYPE html>', file_get_contents($file));
             $this->assertStringContainsString('</html>', file_get_contents($file));
