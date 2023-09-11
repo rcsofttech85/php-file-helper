@@ -5,7 +5,7 @@ namespace rcsofttech85\FileHandler\Exception;
 use Exception;
 use Throwable;
 
-class FileHandlerException extends Exception
+class HashException extends Exception
 {
     public function __construct(string $message = "There was an error", int $code = 0, Throwable $previous = null)
     {

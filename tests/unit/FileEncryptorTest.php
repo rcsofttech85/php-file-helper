@@ -14,12 +14,26 @@ class FileEncryptorTest extends TestCase
 
     private static string $secret;
 
+    protected function setUp(): void
+    {
+        $this->fileEncryptor = new FileEncryptor('movie.csv', self::$secret);
+        parent::setUp();
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $this->fileEncryptor = null;
+    }
+
 
     public static function setUpBeforeClass(): void
     {
         $dotenv = new Dotenv();
         $dotenv->load('.env');
-        self::$secret = getenv('SECRET_KEY');
+        self::$secret = $_ENV['SECRET_KEY'];
+
+
         $content = "Film,Genre,Lead Studio,Audience score %,Profitability,Rotten Tomatoes %,Worldwide Gross,Year\n"
             . "Zack and Miri Make a Porno,Romance,The Weinstein Company,70,1.747541667,64,$41.94 ,2008\n"
             . "Youth in Revolt,Comedy,The Weinstein Company,52,1.09,68,$19.62 ,2010\n"
@@ -62,7 +76,7 @@ class FileEncryptorTest extends TestCase
     #[Test]
     public function throwExceptionIfDecryptionFails()
     {
-        $this->fileEncryptor = new FileEncryptor("movie.csv", 'wrongSecret');
+        $this->fileEncryptor = new FileEncryptor("movie.csv", 'wrong');
         $this->expectException(FileEncryptorException::class);
         $this->expectExceptionMessage('could not decrypt file');
         $this->fileEncryptor->decryptFile();
@@ -74,17 +88,5 @@ class FileEncryptorTest extends TestCase
         $isFileDecrypted = $this->fileEncryptor->decryptFile();
 
         $this->assertTrue($isFileDecrypted);
-    }
-
-    protected function setUp(): void
-    {
-        $this->fileEncryptor = new FileEncryptor('movie.csv', self::$secret);
-        parent::setUp();
-    }
-
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        $this->fileEncryptor = null;
     }
 }
