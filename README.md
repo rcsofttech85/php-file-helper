@@ -60,7 +60,7 @@ $fileHandler->open('file.txt');
 
 $fileHandler->open('php://stdout');
 
-fileHandler->write(data: "hello world");
+$fileHandler->write(data: "hello world");
 
 $fileHandler->close();
 
@@ -159,6 +159,18 @@ $fileEncryptor->decryptFile();
 vendor/bin/file-diff oldFile newFile
 
 ```
+
+**File Integrity**
+
+```
+$fileHasher = new FileHashChecker();
+
+$fileHasher->hashFile(); 
+
+$fileHasher->verifyHash($fileHandlerObject,$hashListFileName);
+
+```
+
 
 
 
