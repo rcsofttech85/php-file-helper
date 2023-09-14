@@ -80,6 +80,7 @@ class FileHandlerTest extends TestCase
         $this->expectException(FileHandlerException::class);
         $this->expectExceptionMessage('Error writing to file');
         $this->fileHandler->write(data: "hello world");
+        $this->fileHandler->close();
     }
 
 
@@ -107,6 +108,7 @@ class FileHandlerTest extends TestCase
         $this->assertEquals("hello world", file_get_contents(filename: 'file'));
 
         $this->assertEquals("hello world", file_get_contents(filename: 'file1'));
+        $this->fileHandler->close();
     }
 
 
@@ -250,6 +252,37 @@ class FileHandlerTest extends TestCase
         } finally {
             unlink($file);
         }
+    }
+
+    #[Test]
+    public function findAndReplaceInCsvMethodShouldReplaceTextUsingColumnOption()
+    {
+        $fileHandler = new FileHandler();
+
+        $hasReplaced = $fileHandler->findAndReplaceInCsv("movie.csv", "Twilight", "Inception", "Film");
+
+        $this->assertTrue($hasReplaced);
+
+
+        $data = $this->fileHandler->open("movie.csv")->searchInCsvFile("Inception", "Film", FileHandler::ARRAY_FORMAT);
+
+        $this->assertEquals($data["Film"], "Inception");
+    }
+
+    #[Test]
+    public function findAndReplaceInCsvMethodShouldReplaceTextWithoutColumnOption()
+    {
+        $fileHandler = new FileHandler();
+
+
+        $hasReplaced = $fileHandler->findAndReplaceInCsv("movie.csv", "Inception", "Twilight");
+
+        $this->assertTrue($hasReplaced);
+
+
+        $data = $this->fileHandler->open("movie.csv")->searchInCsvFile("Twilight", "Film", FileHandler::ARRAY_FORMAT);
+
+        $this->assertEquals($data["Film"], "Twilight");
     }
 
     //  Data Providers
