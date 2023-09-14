@@ -292,7 +292,9 @@ class FileHandler
 
     private function cleanupTempFile(string $tempFilePath): void
     {
-        unlink($tempFilePath);
+        if (file_exists($tempFilePath)) {
+            unlink($tempFilePath);
+        }
     }
 
     private function createTempFileWithHeaders(array $headers): string
