@@ -4,15 +4,31 @@ namespace unit;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use rcsofttech85\FileHandler\CsvFileHandler;
 use rcsofttech85\FileHandler\Exception\HashException;
 use rcsofttech85\FileHandler\FileHandler;
 use rcsofttech85\FileHandler\FileHashChecker;
+use rcsofttech85\FileHandler\TempFileHandler;
 use Symfony\Component\Dotenv\Dotenv;
 
 class FileHashCheckerTest extends TestCase
 {
     private static string $file;
     private FileHashChecker|null $fileHasher = null;
+
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $csvFileHandler = new CsvFileHandler(new FileHandler(), new TempFileHandler());
+        $this->fileHasher = new FileHashChecker("test", $csvFileHandler);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $this->fileHasher = null;
+    }
 
     public static function setUpBeforeClass(): void
     {
@@ -55,7 +71,7 @@ class FileHashCheckerTest extends TestCase
     #[Test]
     public function checkFileIntegrityReturnsTrueIfHashMatch()
     {
-        $isVerified = $this->fileHasher->verifyHash(new FileHandler(), self::$file);
+        $isVerified = $this->fileHasher->verifyHash(storedHashesFile: self::$file);
 
         $this->assertTrue($isVerified);
     }
@@ -66,7 +82,7 @@ class FileHashCheckerTest extends TestCase
         $backup = file_get_contents("test");
         file_put_contents("test", "modified", FILE_APPEND);
 
-        $isVerified = $this->fileHasher->verifyHash(new FileHandler(), self::$file);
+        $isVerified = $this->fileHasher->verifyHash(self::$file);
 
         $this->assertfalse($isVerified);
 
@@ -76,7 +92,7 @@ class FileHashCheckerTest extends TestCase
     #[Test]
     public function shouldReturnFalseIfDifferentAlgoIsUsedForVerifyHash()
     {
-        $isVerified = $this->fileHasher->verifyHash(new FileHandler(), self::$file, FileHashChecker::ALGO_512);
+        $isVerified = $this->fileHasher->verifyHash(self::$file, FileHashChecker::ALGO_512);
 
         $this->assertFalse($isVerified);
     }
@@ -85,22 +101,10 @@ class FileHashCheckerTest extends TestCase
     public function shouldThrowExceptionIfFileIsNotHashed()
     {
         file_put_contents("sample", "this file is not hashed");
-        $this->fileHasher = new FileHashChecker("sample");
-
+        $csvFileHandler = new CsvFileHandler(new FileHandler(), new TempFileHandler());
+        $this->fileHasher = new FileHashChecker("sample", $csvFileHandler);
         $this->expectException(HashException::class);
         $this->expectExceptionMessage("this file is not hashed");
-        $this->fileHasher->verifyHash(new FileHandler(), self::$file, FileHashChecker::ALGO_512);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->fileHasher = new FileHashChecker("test");
-    }
-
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        $this->fileHasher = null;
+        $this->fileHasher->verifyHash(self::$file, FileHashChecker::ALGO_512);
     }
 }
