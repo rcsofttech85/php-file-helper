@@ -2,13 +2,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c6450a9c0f99488e93b34911f1adfb2e)](https://app.codacy.com/gh/rcsofttech85/php-file-helper/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/c6450a9c0f99488e93b34911f1adfb2e)](https://app.codacy.com/gh/rcsofttech85/php-file-helper/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 
-
-
-
-
 **A simple php file helper** ✨
-
-
 
 ==========================================
 
@@ -19,36 +13,39 @@ composer require rcsofttech85/file-handler
 
 ```
 
-
 **search by a keyword in file**
 
 ```
-$fileHandler = new FileHandler();
+$temp = new TempFileHandler();
+$csv = new CsvFileHandler($temp);
 
-$fileHandler->open(filename: 'movie.csv',mode:'r')->searchInCsvFile(keyword: 'Twilight',column:'Film');
+$findByKeyword = $csv->searchInCsvFile("movies.csv","Twilight","Film");
+
 
 ```
 
 **search by a keyword in file and return array**
 
 ```
-$fileHandler = new FileHandler();
+$temp = new TempFileHandler();
+$csv = new CsvFileHandler($temp);
 
-$fileHandler->open(filename: 'movie.csv',mode:'r')->searchInCsvFile(keyword: 'Zack and Miri Make a Porno',column:'Film', format: FileHandler::ARRAY_FORMAT);
+$findByKeyword = $csv->searchInCsvFile("movies.csv","Twilight","Film",FileHandler::ARRAY_FORMAT);
 
 // output
 
 [
-            'Film' => 'Zack and Miri Make a Porno',
-            'Genre' => 'Romance',
-            'Lead Studio' => 'The Weinstein Company',
-            'Audience score %' => '70',
-            'Profitability' => '1.747541667',
-            'Rotten Tomatoes %' => '64',
-            'Worldwide Gross' => '$41.94 ',
-            'Year' => '2008'
+    [Film] => Twilight
+    [Genre] => Romance
+    [Lead Studio] => Summit
+    [Audience score %] => 82
+    [Profitability] => 10.18002703
+    [Rotten Tomatoes %] => 49
+    [Worldwide Gross] => $376.66 
+    [Year] => 2008
 
-        ];
+
+ ];
 ```
 
 **Write multiple file simultaneously:**
@@ -69,10 +66,11 @@ $fileHandler->close();
 **converting file to an array**
 
 ```
-$fileHandler = new FileHandler();
 
-$data = $fileHandler->open(filename: 'movie.csv',mode:'r')->toArray();
+$temp = new TempFileHandler();
+$csv = new CsvFileHandler($temp);
 
+$findByKeyword = $csv->toArray("movies.csv");
 // output
 $data[0] = [
             'Film' => 'Zack and Miri Make a Porno',
@@ -88,11 +86,36 @@ $data[0] = [
 
 ```
 
+**Find and replace in csv file**
+
+```
+
+$temp = new TempFileHandler();
+$csv = new CsvFileHandler($temp);
+
+$findByKeyword = $csv->findAndReplaceInCsv("movies.csv","Twilight","Inception");
+
+```
+
+**Find and replace a specific keyword in a particular column of a CSV file**
+
+```
+
+$temp = new TempFileHandler();
+$csv = new CsvFileHandler($temp);
+
+$findByKeyword = $csv->findAndReplaceInCsv("movies.csv","Inception","Twilight",column: "Film");
+
+```
+
 **converting file to a json format**
 
 ```
-$fileHandler = new FileHandler();
-$this->fileHandler->open(filename: 'movie.csv')->toJson();
+
+$temp = new TempFileHandler();
+$csv = new CsvFileHandler($temp);
+
+$findByKeyword = $csv->toJson("movies.csv");
 
 //output
 [{"Film":"Zack and Miri Make a Porno","Genre":"Romance","Lead Studio":"The Weinstein Company","Audience score %":"70","Profitability":"1.747541667","Rotten Tomatoes %":"64","Worldwide Gross":"$41.94 ","Year":"2008"},{"Film":"Youth in Revolt","Genre":"Comedy","Lead Studio":"The Weinstein Company","Audience score %":"52","Profitability":"1.09","Rotten Tomatoes %":"68","Worldwide Gross":"$19.62 ","Year":"2010"},{"Film":"Twilight","Genre":"Romance","Lead Studio":"Independent","Audience score %":"68","Profitability":"6.383363636","Rotten Tomatoes %":"26","Worldwide Gross":"$702.17 ","Year":"2011"}]
@@ -160,7 +183,7 @@ vendor/bin/file-diff oldFile newFile
 
 ```
 
-**File Integrity**
+**File Integrity check**
 
 ```
 $fileHasher = new FileHashChecker();
