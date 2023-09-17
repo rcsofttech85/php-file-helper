@@ -2,78 +2,62 @@
 
 namespace unit;
 
+use Base\BaseTest;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\Attributes\TestDox;
-use PHPUnit\Framework\TestCase;
 use rcsofttech85\FileHandler\CsvFileHandler;
 use rcsofttech85\FileHandler\Exception\FileHandlerException;
 use rcsofttech85\FileHandler\FileHandler;
-use rcsofttech85\FileHandler\TempFileHandler;
 
-class CsvFileHandlerTest extends TestCase
+class CsvFileHandlerTest extends BaseTest
 {
     private CsvFileHandler|null $csvFileHandler = null;
 
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
-        $content = "Film,Genre,Lead Studio,Audience score %,Profitability,Rotten Tomatoes %,Worldwide Gross,Year\n"
-            . "Zack and Miri Make a Porno,Romance,The Weinstein Company,70,1.747541667,64,$41.94 ,2008\n"
-            . "Youth in Revolt,Comedy,The Weinstein Company,52,1.09,68,$19.62 ,2010\n"
-            . "Twilight,Romance,Independent,68,6.383363636,26,$702.17 ,2011";
-
-        fopen(filename: "file", mode: "w");
-        fopen(filename: "file1", mode: "w");
-        file_put_contents('movie.csv', $content);
+        static::$files = ['movie.csv'];
     }
 
     public static function tearDownAfterClass(): void
     {
         parent::tearDownAfterClass();
-
-        $files = ["file", "movie.csv", 'file1'];
-
-        foreach ($files as $file) {
-            if (file_exists($file)) {
-                unlink(filename: $file);
-            }
-        }
     }
 
-    public static function fileProvider(): iterable
+    protected function setUp(): void
     {
-        $file1 = 'file1.txt';
-        $file2 = 'file2.txt';
-        $file3 = 'file3.txt';
-
-        file_put_contents($file1, "film,year");
-        file_put_contents($file2, "film\nyear");
-        file_put_contents($file3, "Film");
-
-
-        yield [$file1];
-        yield [$file2];
-        yield [$file3];
+        parent::setUp();
+        $this->csvFileHandler = self::$containerBuilder->get('csv_file_handler');
     }
 
-    public static function provideMovieNames(): iterable
+    protected function tearDown(): void
     {
-        yield ["Zack and Miri Make a Porno"];
-        yield ["Youth in Revolt"];
-        yield ["Twilight"];
+        parent::tearDown();
+
+        $this->csvFileHandler = null;
     }
 
-    public static function provideStudioNames(): iterable
+    #[Test]
+    public function findAndReplaceInCsvMethodShouldReplaceTextWithoutColumnOption()
     {
-        yield ["The Weinstein Company"];
-        yield ["Independent"];
+        $hasReplaced = $this->csvFileHandler->findAndReplaceInCsv("movie.csv", "Twilight", "Inception");
+
+        $this->assertTrue($hasReplaced);
+        $this->assertStringContainsString('Inception', file_get_contents('movie.csv'));
+    }
+
+    #[Test]
+    public function findAndReplaceInCsvMethodShouldReplaceTextUsingColumnOption()
+    {
+        $hasReplaced = $this->csvFileHandler->findAndReplaceInCsv("movie.csv", "Inception", "Twilight", "Film");
+
+        $this->assertTrue($hasReplaced);
+        $this->assertStringContainsString('Twilight', file_get_contents('movie.csv'));
     }
 
     #[Test]
     #[DataProvider('provideMovieNames')]
-    #[TestDox('search result with name $keyword exists in file.')]
-    public function resultFoundForExactNameMatch(string $keyword)
+    public function searchByKeyword(string $keyword)
     {
         $isMovieAvailable = $this->csvFileHandler->searchInCsvFile(
             filename: "movie.csv",
@@ -85,8 +69,7 @@ class CsvFileHandlerTest extends TestCase
 
     #[Test]
     #[DataProvider('provideStudioNames')]
-    #[TestDox('search result with name $keyword exists in file.')]
-    public function studioIsFoundForExactNameMatch(string $keyword)
+    public function searchBystudioName(string $keyword)
     {
         $isStudioFound = $this->csvFileHandler->searchInCsvFile(
             filename: "movie.csv",
@@ -116,17 +99,6 @@ class CsvFileHandlerTest extends TestCase
     }
 
     #[Test]
-    public function toJsonMethodReturnsValidJsonFormat()
-    {
-        $jsonData = $this->csvFileHandler->toJson("movie.csv");
-
-        $expectedData = '[{"Film":"Zack and Miri Make a Porno","Genre":"Romance","Lead Studio":"The Weinstein Company","Audience score %":"70","Profitability":"1.747541667","Rotten Tomatoes %":"64","Worldwide Gross":"$41.94 ","Year":"2008"},{"Film":"Youth in Revolt","Genre":"Comedy","Lead Studio":"The Weinstein Company","Audience score %":"52","Profitability":"1.09","Rotten Tomatoes %":"68","Worldwide Gross":"$19.62 ","Year":"2010"},{"Film":"Twilight","Genre":"Romance","Lead Studio":"Independent","Audience score %":"68","Profitability":"6.383363636","Rotten Tomatoes %":"26","Worldwide Gross":"$702.17 ","Year":"2011"}]';
-
-        $this->assertJson($jsonData);
-        $this->assertJsonStringEqualsJsonString($expectedData, $jsonData);
-    }
-
-    #[Test]
     public function searchByKeywordAndReturnArray()
     {
         $expected = [
@@ -151,12 +123,25 @@ class CsvFileHandlerTest extends TestCase
         $this->assertEquals($expected, $data);
     }
 
+
+    #[Test]
+    public function toJsonMethodReturnsValidJsonFormat()
+    {
+        $jsonData = $this->csvFileHandler->toJson("movie.csv");
+
+        $expectedData = '[{"Film":"Zack and Miri Make a Porno","Genre":"Romance","Lead Studio":"The Weinstein Company","Audience score %":"70","Profitability":"1.747541667","Rotten Tomatoes %":"64","Worldwide Gross":"$41.94 ","Year":"2008"},{"Film":"Youth in Revolt","Genre":"Comedy","Lead Studio":"The Weinstein Company","Audience score %":"52","Profitability":"1.09","Rotten Tomatoes %":"68","Worldwide Gross":"$19.62 ","Year":"2010"},{"Film":"Twilight","Genre":"Romance","Lead Studio":"Independent","Audience score %":"68","Profitability":"6.383363636","Rotten Tomatoes %":"26","Worldwide Gross":"$702.17 ","Year":"2011"}]';
+
+        $this->assertJson($jsonData);
+        $this->assertJsonStringEqualsJsonString($expectedData, $jsonData);
+    }
+
+
     #[Test]
     #[DataProvider('fileProvider')]
     public function throwErrorIfFileFormatIsInvalid(string $file)
     {
         $this->expectException(FileHandlerException::class);
-        $this->expectExceptionMessage('invalid file format');
+        $this->expectExceptionMessage('invalid csv file format');
 
         try {
             $this->csvFileHandler->searchInCsvFile(
@@ -169,56 +154,32 @@ class CsvFileHandlerTest extends TestCase
         }
     }
 
-    #[Test]
-    public function findAndReplaceInCsvMethodShouldReplaceTextUsingColumnOption()
+    public static function provideStudioNames(): iterable
     {
-        $fileHandler = new FileHandler();
-        $tempHandler = new TempFileHandler();
-        $csvFileHandler = new CsvFileHandler($fileHandler, $tempHandler);
-
-        $hasReplaced = $csvFileHandler->findAndReplaceInCsv("movie.csv", "Twilight", "Inception", "Film");
-
-        $this->assertTrue($hasReplaced);
-
-
-        $data = $this->csvFileHandler->searchInCsvFile("movie.csv", "Inception", "Film", FileHandler::ARRAY_FORMAT);
-
-        $this->assertEquals($data["Film"], "Inception");
+        yield ["The Weinstein Company"];
+        yield ["Independent"];
     }
 
-
-    /////////////////////////// DATA PROVIDER ////////////////////////////////
-
-    #[Test]
-    public function findAndReplaceInCsvMethodShouldReplaceTextWithoutColumnOption()
+    public static function provideMovieNames(): iterable
     {
-        $fileHandler = new FileHandler();
-        $tempHandler = new TempFileHandler();
-        $csvFileHandler = new CsvFileHandler($fileHandler, $tempHandler);
-
-
-        $hasReplaced = $csvFileHandler->findAndReplaceInCsv("movie.csv", "Inception", "Twilight");
-
-        $this->assertTrue($hasReplaced);
-
-
-        $data = $this->csvFileHandler->searchInCsvFile("movie.csv", "Twilight", "Film", FileHandler::ARRAY_FORMAT);
-
-        $this->assertEquals($data["Film"], "Twilight");
+        yield ["Zack and Miri Make a Porno"];
+        yield ["Youth in Revolt"];
+        yield ["Twilight"];
     }
 
-    protected function setUp(): void
+    public static function fileProvider(): iterable
     {
-        parent::setUp();
-        $fileHandler = new FileHandler();
-        $tempFileHandler = new TempFileHandler();
-        $this->csvFileHandler = new CsvFileHandler($fileHandler, $tempFileHandler);
-    }
+        $file1 = 'file1.txt';
+        $file2 = 'file2.txt';
+        $file3 = 'file3.txt';
 
-    protected function tearDown(): void
-    {
-        parent::tearDown();
+        file_put_contents($file1, "film,year");
+        file_put_contents($file2, "film\nyear");
+        file_put_contents($file3, "Film");
 
-        $this->csvFileHandler = null;
+
+        yield [$file1];
+        yield [$file2];
+        yield [$file3];
     }
 }

@@ -6,7 +6,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use rcsofttech85\FileHandler\TempFileHandler;
 
-class TempFIleHandlerTest extends TestCase
+class TempFileHandlerTest extends TestCase
 {
     private TempFileHandler|null $tempFileHandler = null;
 
@@ -83,7 +83,6 @@ class TempFIleHandlerTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-
         $this->tempFileHandler = null;
     }
 }

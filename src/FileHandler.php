@@ -8,9 +8,9 @@ use ZipArchive;
 
 class FileHandler
 {
-    const ARRAY_FORMAT = 'array';
+    public const ARRAY_FORMAT = 'array';
 
-    private array $files = [];
+    private null|array $files = [];
 
 
     /**
@@ -18,7 +18,7 @@ class FileHandler
      */
     public function open(
         string $filename,
-        string $mode = "r+",
+        string $mode = "w",
         bool $include_path = false,
         $context = null
     ): self {
@@ -39,6 +39,9 @@ class FileHandler
      */
     public function write(string $data, ?int $length = null): void
     {
+        if (!$this->files) {
+            throw new FileHandlerException('no files available to write');
+        }
         foreach ($this->files as $file) {
             $byteWritten = fwrite($file, $data, $length);
             if (!$byteWritten) {
@@ -115,11 +118,20 @@ class FileHandler
      */
     public function close(): void
     {
+        if (!$this->files) {
+            throw new FileHandlerException('no files are opened');
+        }
         foreach ($this->files as $file) {
             if (!fclose($file)) {
                 throw new FileHandlerException('file was not closed');
             }
         }
+        $this->resetFiles();
+    }
+
+    public function resetFiles(): void
+    {
+        $this->files = null;
     }
 
     /**
@@ -134,20 +146,19 @@ class FileHandler
     }
 
 
-    public function ensureSingleFileProcessing(string|null $filename): mixed
+    public function getSingleFileProcessing(string|null $filename): mixed
     {
         if (empty($this->files)) {
             if ($filename && file_exists($filename)) {
                 $this->open($filename);
                 return $this->files[0];
             }
-
             throw new FileHandlerException("No files to process or file not found: $filename");
         }
-
         if (count($this->files) > 1) {
             throw new FileHandlerException("Multiple files not allowed");
         }
+
 
         return $this->files[0];
     }
