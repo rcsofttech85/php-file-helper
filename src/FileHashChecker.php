@@ -13,7 +13,7 @@ class FileHashChecker
      * @param string $filename
      * @throws HashException
      */
-    public function __construct(private readonly string $filename)
+    public function __construct(private readonly string $filename, private readonly CsvFileHandler $csvFileHandler)
     {
         if (!file_exists($this->filename)) {
             throw new HashException('file not found');
@@ -29,20 +29,17 @@ class FileHashChecker
      * @throws HashException
      */
 
-    public function verifyHash(object $fileHandler, string $storedHashesFile, string $algo = self::ALGO_256): bool
+    public function verifyHash(string $storedHashesFile, string $algo = self::ALGO_256): bool
     {
-        if (!$fileHandler instanceof FileHandler) {
-            throw new HashException("object must be instance of " . FileHandler::class);
-        }
-
         if (!$storedHashesFile) {
             throw new HashException('file not found');
         }
 
-        $file = $fileHandler->open(filename: $storedHashesFile)->searchInCsvFile(
-            $this->filename,
-            'File',
-            FileHandler::ARRAY_FORMAT
+        $file = $this->csvFileHandler->searchInCsvFile(
+            filename: $storedHashesFile,
+            keyword: $this->filename,
+            column: 'File',
+            format: FileHandler::ARRAY_FORMAT
         );
 
         if (!$file) {

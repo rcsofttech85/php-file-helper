@@ -1,0 +1,25 @@
+parameters:
+  filename: 'movie.csv'
+  secret: 'password'
+  hash_file_name: 'test'
+
+
+
+services:
+  file_handler:
+    class: 'rcsofttech85\FileHandler\FileHandler'
+
+  file_encryptor:
+    class: 'rcsofttech85\FileHandler\FileEncryptor'
+    arguments: [ '%filename%','%secret%' ]
+
+  temp_file_handler:
+    class: 'rcsofttech85\FileHandler\TempFileHandler'
+
+  csv_file_handler:
+    class: 'rcsofttech85\FileHandler\CsvFileHandler'
+    arguments: [ '@temp_file_handler' ]
+
+  file_hash:
+    class: 'rcsofttech85\FileHandler\FileHashChecker'
+    arguments: [ '%filename%','@csv_file_handler' ]

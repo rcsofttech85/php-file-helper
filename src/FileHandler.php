@@ -3,15 +3,14 @@
 namespace rcsofttech85\FileHandler;
 
 use finfo;
-use Generator;
 use rcsofttech85\FileHandler\Exception\FileHandlerException;
 use ZipArchive;
 
 class FileHandler
 {
-    const ARRAY_FORMAT = 'array';
+    public const ARRAY_FORMAT = 'array';
 
-    private array $files = [];
+    private null|array $files = [];
 
 
     /**
@@ -19,7 +18,7 @@ class FileHandler
      */
     public function open(
         string $filename,
-        string $mode = "r+",
+        string $mode = "w",
         bool $include_path = false,
         $context = null
     ): self {
@@ -40,6 +39,9 @@ class FileHandler
      */
     public function write(string $data, ?int $length = null): void
     {
+        if (!$this->files) {
+            throw new FileHandlerException('no files available to write');
+        }
         foreach ($this->files as $file) {
             $byteWritten = fwrite($file, $data, $length);
             if (!$byteWritten) {
@@ -116,35 +118,20 @@ class FileHandler
      */
     public function close(): void
     {
+        if (!$this->files) {
+            throw new FileHandlerException('no files are opened');
+        }
         foreach ($this->files as $file) {
             if (!fclose($file)) {
                 throw new FileHandlerException('file was not closed');
             }
         }
+        $this->resetFiles();
     }
 
-    public function searchInCsvFile(string $keyword, string $column, string|null $format = null): bool|array
+    public function resetFiles(): void
     {
-        return $this->search($keyword, $column, $format);
-    }
-
-    /**
-     * @throws FileHandlerException
-     */
-    public function toArray(): array
-    {
-        return iterator_to_array($this->getRows());
-    }
-
-
-    /**
-     * @throws FileHandlerException
-     */
-    public function toJson(): string
-    {
-        $data = $this->toArray();
-
-        return json_encode($data);
+        $this->files = null;
     }
 
     /**
@@ -158,187 +145,21 @@ class FileHandler
         unlink($filename);
     }
 
-    /**
-     * @throws FileHandlerException
-     */
-    private function getRows(string|null $filename = null): Generator
+
+    public function getSingleFileProcessing(string|null $filename): mixed
     {
-        $file = $this->ensureSingleFileProcessing($filename);
-        $headers = $this->extractHeader($file);
-
-        $isEmptyFile = true;
-        try {
-            while (($row = fgetcsv($file)) !== false) {
-                $isEmptyFile = false;
-                $this->isValidCsvFileFormat($row);
-                $item = array_combine($headers, $row);
-
-                yield $item;
+        if (empty($this->files)) {
+            if ($filename && file_exists($filename)) {
+                $this->open($filename);
+                return $this->files[0];
             }
-        } finally {
-            fclose($file);
-        }
-
-
-        if ($isEmptyFile) {
-            throw new FileHandlerException('invalid file format');
-        }
-    }
-
-    private function ensureSingleFileProcessing(string|null $filename): mixed
-    {
-        if (count($this->files) < 1) {
-            if (!$filename || !file_exists($filename)) {
-                throw new FileHandlerException("no files to process");
-            }
-            $this->open($filename);
+            throw new FileHandlerException("No files to process or file not found: $filename");
         }
         if (count($this->files) > 1) {
-            throw new FileHandlerException("multiple files not allowed");
+            throw new FileHandlerException("Multiple files not allowed");
         }
+
+
         return $this->files[0];
-    }
-
-    /**
-     * @throws FileHandlerException
-     */
-    private function search(string $keyword, string $column, string|null $format): bool|array
-    {
-        foreach ($this->getRows() as $row) {
-            if ($keyword === $row[$column]) {
-                return ($format === self::ARRAY_FORMAT) ? $row : true;
-            }
-        }
-        return false;
-    }
-
-    public function findAndReplaceInCsv(
-        string $filename,
-        string $keyword,
-        string $replace,
-        string|null $column = null
-    ): bool {
-        $headers = $this->extractHeader($filename);
-
-
-        if (!$headers) {
-            throw new FileHandlerException('failed to extract header');
-        }
-
-        $tempFilePath = $this->createTempFileWithHeaders($headers);
-
-        try {
-            $count = 0;
-            foreach ($this->getRows($filename) as $row) {
-                if (!$column) {
-                    $count += $this->replaceKeywordInRow($row, $keyword, $replace);
-                } else {
-                    $count += $this->replaceKeywordInColumn($row, $column, $keyword, $replace);
-                }
-
-                $this->writeRowToTempFile($tempFilePath, $row);
-            }
-
-            if ($count < 1) {
-                return false;
-            }
-
-            $this->renameTempFile($tempFilePath, $filename);
-        } finally {
-            $this->cleanupTempFile($tempFilePath);
-        }
-
-        return true;
-    }
-
-    private function replaceKeywordInRow(array &$row, string $keyword, string $replace): int
-    {
-        $count = 0;
-        $replacement = array_search($keyword, $row);
-
-        if ($replacement !== false) {
-            $row[$replacement] = $replace;
-            $count++;
-        }
-
-        return $count;
-    }
-
-    private function replaceKeywordInColumn(array &$row, string $column, string $keyword, string $replace): int
-    {
-        $count = 0;
-
-        if ($keyword === $row[$column]) {
-            $row[$column] = $replace;
-            $count++;
-        }
-
-        return $count;
-    }
-
-    private function writeRowToTempFile(string $tempFilePath, array $row): void
-    {
-        $tempFileHandle = fopen($tempFilePath, 'a');
-        fputs($tempFileHandle, implode(',', $row) . PHP_EOL);
-        fclose($tempFileHandle);
-    }
-
-    private function renameTempFile(string $tempFilePath, string $filename): void
-    {
-        if (!rename($tempFilePath, $filename)) {
-            throw new FileHandlerException('Failed to rename temp file');
-        }
-    }
-
-    private function cleanupTempFile(string $tempFilePath): void
-    {
-        if (file_exists($tempFilePath)) {
-            unlink($tempFilePath);
-        }
-    }
-
-    private function createTempFileWithHeaders(array $headers): string
-    {
-        $tempFilePath = tempnam(sys_get_temp_dir(), 'tempfile_');
-        $tempFileHandle = fopen($tempFilePath, 'w');
-        fputs($tempFileHandle, implode(',', $headers) . PHP_EOL);
-        fclose($tempFileHandle);
-
-        return $tempFilePath;
-    }
-
-
-    /**
-     * @throws FileHandlerException
-     */
-    private function isValidCsvFileFormat(array|false $row): void
-    {
-        if (!$row || count($row) <= 1) {
-            throw new FileHandlerException('invalid file format');
-        }
-    }
-
-    private function extractHeader(mixed $file): array|false
-    {
-        if (is_resource($file)) {
-            $headers = fgetcsv($file);
-        }
-        if (is_string($file)) {
-            if (!file_exists($file)) {
-                return false;
-            }
-            try {
-                $file = fopen($file, 'r');
-                $headers = fgetcsv($file);
-            } finally {
-                fclose($file);
-            }
-        }
-
-        if ($this->isValidCsvFileFormat($headers) !== false) {
-            return $headers;
-        }
-
-        return false;
     }
 }
