@@ -65,7 +65,7 @@ class CsvFileHandler
 
         try {
             $count = 0;
-            foreach ($this->getRows($filename, $headers) as $row) {
+            foreach ($this->getRows($filename) as $row) {
                 $count += (!$column)
                     ? $this->replaceKeywordInRow($row, $keyword, $replace)
                     : $this->replaceKeywordInColumn($row, $column, $keyword, $replace);
