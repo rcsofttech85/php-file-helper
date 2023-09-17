@@ -4,9 +4,10 @@ namespace unit;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use rcsofttech85\FileHandler\Container;
 use rcsofttech85\FileHandler\TempFileHandler;
 
-class TempFIleHandlerTest extends TestCase
+class TempFileHandlerTest extends TestCase
 {
     private TempFileHandler|null $tempFileHandler = null;
 
@@ -77,7 +78,7 @@ class TempFIleHandlerTest extends TestCase
     {
         parent::setUp();
 
-        $this->tempFileHandler = new TempFileHandler();
+        $this->tempFileHandler = Container::getService('temp_file_handler');
     }
 
     protected function tearDown(): void

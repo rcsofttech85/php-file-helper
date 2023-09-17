@@ -2,68 +2,60 @@
 
 namespace unit;
 
+use Base\BaseTest;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use rcsofttech85\FileHandler\Container;
 use rcsofttech85\FileHandler\CsvFileHandler;
 use rcsofttech85\FileHandler\Exception\HashException;
-use rcsofttech85\FileHandler\FileHandler;
 use rcsofttech85\FileHandler\FileHashChecker;
-use rcsofttech85\FileHandler\TempFileHandler;
 use Symfony\Component\Dotenv\Dotenv;
 
-class FileHashCheckerTest extends TestCase
+class FileHashCheckerTest extends BaseTest
 {
     private static string $file;
-    private FileHashChecker|null $fileHasher = null;
+    private FileHashChecker|null $fileHash = null;
 
 
     protected function setUp(): void
     {
         parent::setUp();
-        $csvFileHandler = new CsvFileHandler(new FileHandler(), new TempFileHandler());
-        $this->fileHasher = new FileHashChecker("test", $csvFileHandler);
+
+        $this->fileHash = Container::getService('file_hash');
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-        $this->fileHasher = null;
+        $this->fileHash = null;
     }
 
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
-
         $dotenv = new Dotenv();
         $dotenv->load('.env');
 
-        $file = $_ENV['FILE_NAME']; // this file contains list of all hashes
-
-        self::$file = $file;
-
-
-        file_put_contents("test", "hello world");
+        self::$file = $_ENV['FILE_NAME'];
+        static::$files = ['movie.csv', 'sample'];
     }
 
     public static function tearDownAfterClass(): void
     {
         parent::tearDownAfterClass();
-        unlink("test");
-        unlink("sample");
     }
 
     #[Test]
     public function shouldGenerateValidHashForDifferentAlgo()
     {
-        $expectedHash = "644bcc7e564373040999aac89e7622f3ca71fba1d972fd94a31c3bfbf24e3938";
+        $expectedHash = "5923032f7e18edf69e1a3221be3205ce658ec0e4fb274016212a09a804240683";
 
-        $actualHash = $this->fileHasher->hashFile(); //default ALGO_256
+        $actualHash = $this->fileHash->hashFile(); //default ALGO_256
 
         $this->assertEquals($expectedHash, $actualHash);
 
-        $expectedHash = "840006653e9ac9e95117a15c915caab81662918e925de9e004f774ff82d7079a40d4d27b1b372657c61d46d470304c88c788b3a4527ad074d1dccbee5dbaa99a";
+        $expectedHash = "1050bcc2d7d840d634f067a22abb4cd693b1f2590849982e29a6f9bb28963f73392b63ea24ae17edfaa500ee62b9e5482b9648af0b2b7d941992af3b0f9cbd3b";
 
-        $actualHash = $this->fileHasher->hashFile(FileHashChecker::ALGO_512);
+        $actualHash = $this->fileHash->hashFile(FileHashChecker::ALGO_512);
 
         $this->assertEquals($expectedHash, $actualHash);
     }
@@ -71,7 +63,7 @@ class FileHashCheckerTest extends TestCase
     #[Test]
     public function checkFileIntegrityReturnsTrueIfHashMatch()
     {
-        $isVerified = $this->fileHasher->verifyHash(storedHashesFile: self::$file);
+        $isVerified = $this->fileHash->verifyHash(storedHashesFile: self::$file);
 
         $this->assertTrue($isVerified);
     }
@@ -79,20 +71,20 @@ class FileHashCheckerTest extends TestCase
     #[Test]
     public function shouldReturnFalseIfFileIsModified()
     {
-        $backup = file_get_contents("test");
-        file_put_contents("test", "modified", FILE_APPEND);
+        $backup = file_get_contents("movie.csv");
+        file_put_contents("movie.csv", "modified", FILE_APPEND);
 
-        $isVerified = $this->fileHasher->verifyHash(self::$file);
+        $isVerified = $this->fileHash->verifyHash(self::$file);
 
         $this->assertfalse($isVerified);
 
-        file_put_contents("test", $backup);
+        file_put_contents("movie.csv", $backup);
     }
 
     #[Test]
     public function shouldReturnFalseIfDifferentAlgoIsUsedForVerifyHash()
     {
-        $isVerified = $this->fileHasher->verifyHash(self::$file, FileHashChecker::ALGO_512);
+        $isVerified = $this->fileHash->verifyHash(self::$file, FileHashChecker::ALGO_512);
 
         $this->assertFalse($isVerified);
     }
@@ -100,11 +92,12 @@ class FileHashCheckerTest extends TestCase
     #[Test]
     public function shouldThrowExceptionIfFileIsNotHashed()
     {
+        /** @var CsvFileHandler $csvFile */
+        $csvFile = Container::getService('csv_file_handler');
         file_put_contents("sample", "this file is not hashed");
-        $csvFileHandler = new CsvFileHandler(new FileHandler(), new TempFileHandler());
-        $this->fileHasher = new FileHashChecker("sample", $csvFileHandler);
+        $this->fileHash = new FileHashChecker("sample", $csvFile);
         $this->expectException(HashException::class);
         $this->expectExceptionMessage("this file is not hashed");
-        $this->fileHasher->verifyHash(self::$file, FileHashChecker::ALGO_512);
+        $this->fileHash->verifyHash(self::$file, FileHashChecker::ALGO_512);
     }
 }

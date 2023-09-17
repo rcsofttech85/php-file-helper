@@ -8,9 +8,44 @@ use rcsofttech85\FileHandler\Exception\FileHandlerException;
 class CsvFileHandler
 {
     public function __construct(
-        private readonly FileHandler $fileHandler,
         private readonly TempFileHandler $tempFileHandler
     ) {
+    }
+
+    public function searchInCsvFile(
+        string $filename,
+        string $keyword,
+        string $column,
+        string|null $format = null
+    ): bool|array {
+        if (!file_exists($filename)) {
+            throw new FileHandlerException('file not found');
+        }
+
+
+        foreach ($this->getRows($filename) as $row) {
+            if ($keyword === $row[$column]) {
+                return ($format === FileHandler::ARRAY_FORMAT) ? $row : true;
+            }
+        }
+        return false;
+    }
+
+
+    public function toJson(string $filename): string
+    {
+        $data = $this->toArray($filename);
+
+        return json_encode($data);
+    }
+
+    public function toArray(string $filename): array
+    {
+        if (!file_exists($filename)) {
+            throw new FileHandlerException('file not found');
+        }
+
+        return iterator_to_array($this->getRows($filename));
     }
 
     public function findAndReplaceInCsv(
@@ -21,16 +56,16 @@ class CsvFileHandler
     ): bool {
         $headers = $this->extractHeader($filename);
 
-
         if (!$headers) {
             throw new FileHandlerException('failed to extract header');
         }
 
         $tempFilePath = $this->tempFileHandler->createTempFileWithHeaders($headers);
 
+
         try {
             $count = 0;
-            foreach ($this->getRows($filename) as $row) {
+            foreach ($this->getRows($filename, $headers) as $row) {
                 $count += (!$column)
                     ? $this->replaceKeywordInRow($row, $keyword, $replace)
                     : $this->replaceKeywordInColumn($row, $column, $keyword, $replace);
@@ -53,6 +88,7 @@ class CsvFileHandler
 
     private function extractHeader(mixed $file): array|false
     {
+        $headers = [];
         if (is_resource($file)) {
             $headers = fgetcsv($file);
         }
@@ -68,41 +104,50 @@ class CsvFileHandler
             }
         }
 
-        if ($this->isValidCsvFileFormat($headers) !== false) {
-            return $headers;
+        if (!$headers) {
+            return false;
         }
 
-        return false;
-    }
-
-    private function isValidCsvFileFormat(array|false $row): void
-    {
-        if (!$row || count($row) <= 1) {
-            throw new FileHandlerException('invalid file format');
+        if (!$this->isValidCsvFileFormat($headers)) {
+            return false;
         }
+
+
+        return $headers;
     }
 
-    private function getRows(string|null $filename = null): Generator
+    private function isValidCsvFileFormat(array $row): bool
     {
-        $file = $this->fileHandler->ensureSingleFileProcessing($filename);
-        $headers = $this->extractHeader($file);
+        if (count($row) <= 1) {
+            return false;
+        }
+        return true;
+    }
+
+    private function getRows(string $filename): Generator
+    {
+        $csvFile = fopen($filename, 'r');
+        $headers = $this->extractHeader($csvFile);
+
 
         $isEmptyFile = true;
         try {
-            while (($row = fgetcsv($file)) !== false) {
+            while (($row = fgetcsv($csvFile)) !== false) {
                 $isEmptyFile = false;
-                $this->isValidCsvFileFormat($row);
+                if (!$this->isValidCsvFileFormat($row)) {
+                    throw new FileHandlerException('invalid csv file format');
+                }
                 $item = array_combine($headers, $row);
 
                 yield $item;
             }
         } finally {
-            fclose($file);
+            fclose($csvFile);
         }
 
 
         if ($isEmptyFile) {
-            throw new FileHandlerException('invalid file format');
+            throw new FileHandlerException('invalid csv file format');
         }
     }
 
@@ -129,40 +174,5 @@ class CsvFileHandler
         }
 
         return $count;
-    }
-
-    public function searchInCsvFile(
-        string $filename,
-        string $keyword,
-        string $column,
-        string|null $format = null
-    ): bool|array {
-        if (!file_exists($filename)) {
-            throw new FileHandlerException('file not found');
-        }
-        $this->fileHandler->open($filename);
-
-        foreach ($this->getRows() as $row) {
-            if ($keyword === $row[$column]) {
-                return ($format === FileHandler::ARRAY_FORMAT) ? $row : true;
-            }
-        }
-        return false;
-    }
-
-    public function toJson(string $filename): string
-    {
-        $data = $this->toArray($filename);
-
-        return json_encode($data);
-    }
-
-    public function toArray(string $filename): array
-    {
-        if (!file_exists($filename)) {
-            throw new FileHandlerException('file not found');
-        }
-        $this->fileHandler->open($filename);
-        return iterator_to_array($this->getRows());
     }
 }
