@@ -190,7 +190,7 @@ $fileHasher = new FileHashChecker();
 
 $fileHasher->hashFile(); 
 
-$fileHasher->verifyHash($fileHandlerObject,$hashListFileName);
+$fileHasher->verifyHash($hashListFile);
 
 ```
 
