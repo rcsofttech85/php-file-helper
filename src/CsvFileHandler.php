@@ -12,6 +12,14 @@ class CsvFileHandler
     ) {
     }
 
+    /**
+     * @param string $filename
+     * @param string $keyword
+     * @param string $column
+     * @param string|null $format
+     * @return bool|array<string,string>
+     * @throws FileHandlerException
+     */
     public function searchInCsvFile(
         string $filename,
         string $keyword,
@@ -32,13 +40,18 @@ class CsvFileHandler
     }
 
 
-    public function toJson(string $filename): string
+    public function toJson(string $filename): string|false
     {
         $data = $this->toArray($filename);
 
         return json_encode($data);
     }
 
+    /**
+     * @param string $filename
+     * @return array<int,array<string,string>>
+     * @throws FileHandlerException
+     */
     public function toArray(string $filename): array
     {
         if (!file_exists($filename)) {
@@ -61,6 +74,9 @@ class CsvFileHandler
         }
 
         $tempFilePath = $this->tempFileHandler->createTempFileWithHeaders($headers);
+        if (!$tempFilePath) {
+            return false;
+        }
 
 
         try {
@@ -86,6 +102,11 @@ class CsvFileHandler
         return true;
     }
 
+    /**
+     * @param mixed $file
+     * @return array<string>|false
+     */
+
     private function extractHeader(mixed $file): array|false
     {
         $headers = [];
@@ -93,15 +114,12 @@ class CsvFileHandler
             $headers = fgetcsv($file);
         }
         if (is_string($file)) {
-            if (!file_exists($file)) {
+            $file = fopen($file, 'r');
+            if (!$file) {
                 return false;
             }
-            try {
-                $file = fopen($file, 'r');
-                $headers = fgetcsv($file);
-            } finally {
-                fclose($file);
-            }
+            $headers = fgetcsv($file);
+            fclose($file);
         }
 
         if (!$headers) {
@@ -116,6 +134,10 @@ class CsvFileHandler
         return $headers;
     }
 
+    /**
+     * @param array<string> $row
+     * @return bool
+     */
     private function isValidCsvFileFormat(array $row): bool
     {
         if (count($row) <= 1) {
@@ -124,10 +146,21 @@ class CsvFileHandler
         return true;
     }
 
+    /**
+     * @param string $filename
+     * @return Generator
+     * @throws FileHandlerException
+     */
     private function getRows(string $filename): Generator
     {
         $csvFile = fopen($filename, 'r');
+        if (!$csvFile) {
+            throw new FileHandlerException('file not found');
+        }
         $headers = $this->extractHeader($csvFile);
+        if (!is_array($headers)) {
+            throw new FileHandlerException('could not extract header');
+        }
 
 
         $isEmptyFile = true;
@@ -151,6 +184,12 @@ class CsvFileHandler
         }
     }
 
+    /**
+     * @param array<string> $row
+     * @param string $keyword
+     * @param string $replace
+     * @return int
+     */
     private function replaceKeywordInRow(array &$row, string $keyword, string $replace): int
     {
         $count = 0;
@@ -164,6 +203,13 @@ class CsvFileHandler
         return $count;
     }
 
+    /**
+     * @param array<string> $row
+     * @param string $column
+     * @param string $keyword
+     * @param string $replace
+     * @return int
+     */
     private function replaceKeywordInColumn(array &$row, string $column, string $keyword, string $replace): int
     {
         $count = 0;

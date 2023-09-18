@@ -10,17 +10,17 @@ class FileHandler
 {
     public const ARRAY_FORMAT = 'array';
 
+    /**
+     * @var array<resource>|null
+     */
     private null|array $files = [];
 
 
-    /**
-     * @throws FileHandlerException
-     */
     public function open(
         string $filename,
         string $mode = "w",
         bool $include_path = false,
-        $context = null
+        mixed $context = null
     ): self {
         $file = fopen($filename, $mode, $include_path, $context);
 
@@ -35,6 +35,9 @@ class FileHandler
 
 
     /**
+     * @param string $data
+     * @param int<0, max>|null $length
+     * @return void
      * @throws FileHandlerException
      */
     public function write(string $data, ?int $length = null): void
@@ -143,23 +146,5 @@ class FileHandler
             throw new FileHandlerException('file does not exists');
         }
         unlink($filename);
-    }
-
-
-    public function getSingleFileProcessing(string|null $filename): mixed
-    {
-        if (empty($this->files)) {
-            if ($filename && file_exists($filename)) {
-                $this->open($filename);
-                return $this->files[0];
-            }
-            throw new FileHandlerException("No files to process or file not found: $filename");
-        }
-        if (count($this->files) > 1) {
-            throw new FileHandlerException("Multiple files not allowed");
-        }
-
-
-        return $this->files[0];
     }
 }

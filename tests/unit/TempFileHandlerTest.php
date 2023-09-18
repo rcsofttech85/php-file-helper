@@ -64,6 +64,9 @@ class TempFileHandlerTest extends TestCase
 
 
         $tempFilePath = $this->tempFileHandler->createTempFileWithHeaders($headers);
+        if (!$tempFilePath) {
+            $this->fail('could not generate temp file with header');
+        }
 
         $fileContents = file_get_contents($tempFilePath);
         $expectedContents = implode(',', $headers) . PHP_EOL;

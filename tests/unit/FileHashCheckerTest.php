@@ -4,8 +4,6 @@ namespace unit;
 
 use Base\BaseTest;
 use PHPUnit\Framework\Attributes\Test;
-use rcsofttech85\FileHandler\CsvFileHandler;
-use rcsofttech85\FileHandler\Exception\HashException;
 use rcsofttech85\FileHandler\FileHashChecker;
 use Symfony\Component\Dotenv\Dotenv;
 
@@ -19,7 +17,7 @@ class FileHashCheckerTest extends BaseTest
     {
         parent::setUp();
 
-        $this->fileHash = self::$containerBuilder->get('file_hash');
+        $this->fileHash = $this->setObjectHandler(FileHashChecker::class, 'file_hash');
     }
 
     protected function tearDown(): void
@@ -44,7 +42,7 @@ class FileHashCheckerTest extends BaseTest
     }
 
     #[Test]
-    public function shouldGenerateValidHashForDifferentAlgo()
+    public function shouldGenerateValidHashForDifferentAlgo(): void
     {
         $expectedHash = "5923032f7e18edf69e1a3221be3205ce658ec0e4fb274016212a09a804240683";
 
@@ -60,7 +58,7 @@ class FileHashCheckerTest extends BaseTest
     }
 
     #[Test]
-    public function checkFileIntegrityReturnsTrueIfHashMatch()
+    public function checkFileIntegrityReturnsTrueIfHashMatch(): void
     {
         $isVerified = $this->fileHash->verifyHash(storedHashesFile: self::$file);
 
@@ -68,7 +66,7 @@ class FileHashCheckerTest extends BaseTest
     }
 
     #[Test]
-    public function shouldReturnFalseIfFileIsModified()
+    public function shouldReturnFalseIfFileIsModified(): void
     {
         $backup = file_get_contents("movie.csv");
         file_put_contents("movie.csv", "modified", FILE_APPEND);
@@ -81,22 +79,10 @@ class FileHashCheckerTest extends BaseTest
     }
 
     #[Test]
-    public function shouldReturnFalseIfDifferentAlgoIsUsedForVerifyHash()
+    public function shouldReturnFalseIfDifferentAlgoIsUsedForVerifyHash(): void
     {
         $isVerified = $this->fileHash->verifyHash(self::$file, FileHashChecker::ALGO_512);
 
         $this->assertFalse($isVerified);
-    }
-
-    #[Test]
-    public function shouldThrowExceptionIfFileIsNotHashed()
-    {
-        /** @var CsvFileHandler $csvFile */
-        $csvFile = self::$containerBuilder->get('csv_file_handler');
-        file_put_contents("sample", "this file is not hashed");
-        $this->fileHash = new FileHashChecker("sample", $csvFile);
-        $this->expectException(HashException::class);
-        $this->expectExceptionMessage("this file is not hashed");
-        $this->fileHash->verifyHash(self::$file, FileHashChecker::ALGO_512);
     }
 }

@@ -2,47 +2,54 @@
 
 namespace Integration;
 
+use Base\BaseTest;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use rcsofttech85\FileHandler\Exception\StreamException;
 use rcsofttech85\FileHandler\StreamHandler;
+use Throwable;
 
 #[Group("integration")]
-class StreamHandlerTest extends TestCase
+class StreamHandlerTest extends BaseTest
 {
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+        static::$files = ["output.html", "output1.html", "output2.html"];
+    }
+
     public static function tearDownAfterClass(): void
     {
         parent::tearDownAfterClass();
-
-        $files = ["output.html", "output1.html", "output2.html"];
-
-        foreach ($files as $file) {
-            if (file_exists($file)) {
-                unlink($file);
-            }
-        }
     }
 
+    /**
+     * @param array<string,string> $urls
+     * @return void
+     * @throws StreamException
+     * @throws Throwable
+     */
     #[Test]
     #[DataProvider('streamDataProvider')]
-    public function streamAndWriteToFile($urls)
+    public function streamAndWriteToFile(array $urls): void
     {
         $stream = new StreamHandler($urls);
         $stream->initiateConcurrentStreams()->start()->resume();
 
         $files = array_keys($urls);
         foreach ($files as $file) {
+            $data = $this->isFileValid($file);
             $this->assertGreaterThan(0, filesize($file));
-            $this->assertStringContainsString('<!DOCTYPE html>', file_get_contents($file));
-            $this->assertStringContainsString('</html>', file_get_contents($file));
+            $this->assertStringContainsString('<!DOCTYPE html>', $data);
+            $this->assertStringContainsString('</html>', $data);
         }
     }
 
+
     #[Test]
     #[DataProvider('wrongStreamDataProvider')]
-    public function throwExceptionIfUrlIsInvalid($outputFile, $url)
+    public function throwExceptionIfUrlIsInvalid(string $outputFile, string $url): void
     {
         $stream = new StreamHandler([$outputFile => $url]);
 
@@ -52,19 +59,25 @@ class StreamHandlerTest extends TestCase
     }
 
     #[Test]
-    public function throwExceptionIfEmptyDataProvided()
+    public function throwExceptionIfEmptyDataProvided(): void
     {
         $this->expectException(StreamException::class);
         $this->expectExceptionMessage('No stream URLs provided.');
         new StreamHandler([]);
     }
 
+    /**
+     * @return iterable<array<string>>
+     */
     public static function wrongStreamDataProvider(): iterable
     {
         yield ["output.html", "https://gist.github"];
     }
 
 
+    /**
+     * @return iterable<array<int,array<string,string>>>
+     */
     public static function streamDataProvider(): iterable
     {
         yield [

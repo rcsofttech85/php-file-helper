@@ -15,7 +15,7 @@ class FileHandlerTest extends BaseTest
     {
         parent::setUp();
 
-        $this->fileHandler = self::$containerBuilder->get('file_handler');
+        $this->fileHandler = $this->setObjectHandler(FileHandler::class, 'file_handler');
     }
 
     public static function setUpBeforeClass(): void
@@ -38,7 +38,7 @@ class FileHandlerTest extends BaseTest
 
 
     #[Test]
-    public function fileSuccessfullyWritten()
+    public function fileSuccessfullyWritten(): void
     {
         $this->fileHandler->open(filename: 'file');
 
@@ -48,7 +48,7 @@ class FileHandlerTest extends BaseTest
     }
 
     #[Test]
-    public function shouldThrowExceptionIfFileIsNotFound()
+    public function shouldThrowExceptionIfFileIsNotFound(): void
     {
         $this->expectException(FileHandlerException::class);
         $this->expectExceptionMessage('File not found');
@@ -56,7 +56,7 @@ class FileHandlerTest extends BaseTest
     }
 
     #[Test]
-    public function shouldThrowExceptionIfFileIsNotWritable()
+    public function shouldThrowExceptionIfFileIsNotWritable(): void
     {
         $this->fileHandler->open(filename: 'file', mode: 'r');
 
@@ -67,7 +67,7 @@ class FileHandlerTest extends BaseTest
     }
 
     #[Test]
-    public function successfulCompression()
+    public function successfulCompression(): void
     {
         $testFile = 'movie.csv';
         $compressedZip = 'compressed.zip';
@@ -81,7 +81,7 @@ class FileHandlerTest extends BaseTest
     }
 
     #[Test]
-    public function getMimeTypeFunctionReturnsCorrectInfo()
+    public function getMimeTypeFunctionReturnsCorrectInfo(): void
     {
         $csvFile = $this->fileHandler->getMimeType("movie.csv");
         $zipFile = $this->fileHandler->getMimeType("compressed.zip");
@@ -91,7 +91,7 @@ class FileHandlerTest extends BaseTest
     }
 
     #[Test]
-    public function successfulDecompression()
+    public function successfulDecompression(): void
     {
         $compressedZip = 'compressed.zip';
         $extractPath = 'extracted_contents';
@@ -112,7 +112,7 @@ class FileHandlerTest extends BaseTest
     }
 
     #[Test]
-    public function fileIsClosedProperly()
+    public function fileIsClosedProperly(): void
     {
         $this->fileHandler->open(filename: 'file');
         $this->fileHandler->write(data: "hello world");
@@ -124,7 +124,7 @@ class FileHandlerTest extends BaseTest
     }
 
     #[Test]
-    public function multipleFileCanBeWrittenSimultaneously()
+    public function multipleFileCanBeWrittenSimultaneously(): void
     {
         $this->fileHandler->open(filename: 'file');
 

@@ -9,9 +9,12 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 class BaseTest extends TestCase
 {
+    /**
+     * @var array<string>|null
+     */
     protected static array|null $files = [];
 
-    protected static ContainerBuilder|null $containerBuilder;
+    private static ContainerBuilder|null $containerBuilder;
 
     public static function setUpBeforeClass(): void
     {
@@ -37,5 +40,23 @@ class BaseTest extends TestCase
             }
         }
         static::$files = null;
+    }
+
+    protected function isFileValid(string $filename): mixed
+    {
+        if (!file_exists($filename) || !$data = file_get_contents($filename)) {
+            $this->fail('file does not exists or has no content');
+        }
+        return $data;
+    }
+
+    protected function setObjectHandler(string $classname, string $serviceId): mixed
+    {
+        $objectHandler = self::$containerBuilder->get($serviceId);
+
+        if (!is_a($objectHandler, $classname)) {
+            $this->fail("provided service is not an instance of " . $classname);
+        }
+        return $objectHandler;
     }
 }
