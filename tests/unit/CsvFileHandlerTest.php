@@ -11,7 +11,7 @@ use rcsofttech85\FileHandler\FileHandler;
 
 class CsvFileHandlerTest extends BaseTest
 {
-    private CsvFileHandler|null $csvFileHandler = null;
+    private CsvFileHandler|null $csvFileHandler;
 
     public static function setUpBeforeClass(): void
     {
@@ -27,7 +27,7 @@ class CsvFileHandlerTest extends BaseTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->csvFileHandler = self::$containerBuilder->get('csv_file_handler');
+        $this->csvFileHandler = $this->setObjectHandler(CsvFileHandler::class, 'csv_file_handler');
     }
 
     protected function tearDown(): void
@@ -37,27 +37,31 @@ class CsvFileHandlerTest extends BaseTest
         $this->csvFileHandler = null;
     }
 
+
     #[Test]
-    public function findAndReplaceInCsvMethodShouldReplaceTextWithoutColumnOption()
+    public function findAndReplaceInCsvMethodShouldReplaceTextWithoutColumnOption(): void
     {
         $hasReplaced = $this->csvFileHandler->findAndReplaceInCsv("movie.csv", "Twilight", "Inception");
 
+        $data = $this->isFileValid('movie.csv');
+
         $this->assertTrue($hasReplaced);
-        $this->assertStringContainsString('Inception', file_get_contents('movie.csv'));
+        $this->assertStringContainsString('Inception', $data);
     }
 
     #[Test]
-    public function findAndReplaceInCsvMethodShouldReplaceTextUsingColumnOption()
+    public function findAndReplaceInCsvMethodShouldReplaceTextUsingColumnOption(): void
     {
         $hasReplaced = $this->csvFileHandler->findAndReplaceInCsv("movie.csv", "Inception", "Twilight", "Film");
 
+        $data = $this->isFileValid('movie.csv');
         $this->assertTrue($hasReplaced);
-        $this->assertStringContainsString('Twilight', file_get_contents('movie.csv'));
+        $this->assertStringContainsString('Twilight', $data);
     }
 
     #[Test]
     #[DataProvider('provideMovieNames')]
-    public function searchByKeyword(string $keyword)
+    public function searchByKeyword(string $keyword): void
     {
         $isMovieAvailable = $this->csvFileHandler->searchInCsvFile(
             filename: "movie.csv",
@@ -69,7 +73,7 @@ class CsvFileHandlerTest extends BaseTest
 
     #[Test]
     #[DataProvider('provideStudioNames')]
-    public function searchBystudioName(string $keyword)
+    public function searchBystudioName(string $keyword): void
     {
         $isStudioFound = $this->csvFileHandler->searchInCsvFile(
             filename: "movie.csv",
@@ -80,7 +84,7 @@ class CsvFileHandlerTest extends BaseTest
     }
 
     #[Test]
-    public function toArrayMethodReturnsValidArray()
+    public function toArrayMethodReturnsValidArray(): void
     {
         $data = $this->csvFileHandler->toArray("movie.csv");
         $expected = [
@@ -99,7 +103,7 @@ class CsvFileHandlerTest extends BaseTest
     }
 
     #[Test]
-    public function searchByKeywordAndReturnArray()
+    public function searchByKeywordAndReturnArray(): void
     {
         $expected = [
             'Film' => 'Zack and Miri Make a Porno',
@@ -125,9 +129,12 @@ class CsvFileHandlerTest extends BaseTest
 
 
     #[Test]
-    public function toJsonMethodReturnsValidJsonFormat()
+    public function toJsonMethodReturnsValidJsonFormat(): void
     {
         $jsonData = $this->csvFileHandler->toJson("movie.csv");
+        if (!$jsonData) {
+            $this->fail('could not convert to json format');
+        }
 
         $expectedData = '[{"Film":"Zack and Miri Make a Porno","Genre":"Romance","Lead Studio":"The Weinstein Company","Audience score %":"70","Profitability":"1.747541667","Rotten Tomatoes %":"64","Worldwide Gross":"$41.94 ","Year":"2008"},{"Film":"Youth in Revolt","Genre":"Comedy","Lead Studio":"The Weinstein Company","Audience score %":"52","Profitability":"1.09","Rotten Tomatoes %":"68","Worldwide Gross":"$19.62 ","Year":"2010"},{"Film":"Twilight","Genre":"Romance","Lead Studio":"Independent","Audience score %":"68","Profitability":"6.383363636","Rotten Tomatoes %":"26","Worldwide Gross":"$702.17 ","Year":"2011"}]';
 
@@ -138,10 +145,12 @@ class CsvFileHandlerTest extends BaseTest
 
     #[Test]
     #[DataProvider('fileProvider')]
-    public function throwErrorIfFileFormatIsInvalid(string $file)
+    public function throwErrorIfFileFormatIsInvalid(string $file): void
     {
+        $message = ($file === 'file1.txt') ? 'invalid csv file format' : 'could not extract header';
         $this->expectException(FileHandlerException::class);
-        $this->expectExceptionMessage('invalid csv file format');
+        $this->expectExceptionMessage($message);
+        $this->expectExceptionMessage($message);
 
         try {
             $this->csvFileHandler->searchInCsvFile(
@@ -154,18 +163,29 @@ class CsvFileHandlerTest extends BaseTest
         }
     }
 
+
+    /**
+     * @return iterable<array<string>>
+     */
     public static function provideStudioNames(): iterable
     {
         yield ["The Weinstein Company"];
         yield ["Independent"];
     }
 
+    /**
+     * @return iterable<array<string>>
+     */
     public static function provideMovieNames(): iterable
     {
         yield ["Zack and Miri Make a Porno"];
         yield ["Youth in Revolt"];
         yield ["Twilight"];
     }
+
+    /**
+     * @return iterable<array<string>>
+     */
 
     public static function fileProvider(): iterable
     {

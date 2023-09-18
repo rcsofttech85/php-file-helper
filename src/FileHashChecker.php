@@ -6,8 +6,8 @@ use rcsofttech85\FileHandler\Exception\HashException;
 
 class FileHashChecker
 {
-    const ALGO_256 = 'sha3-256';
-    const ALGO_512 = 'sha3-512';
+    public const ALGO_256 = 'sha3-256';
+    public const ALGO_512 = 'sha3-512';
 
     /**
      * @param string $filename
@@ -21,7 +21,6 @@ class FileHashChecker
     }
 
     /**
-     * @param object $fileHandler
      * @param string $storedHashesFile
      * @param string $algo
      * @return bool
@@ -42,7 +41,7 @@ class FileHashChecker
             format: FileHandler::ARRAY_FORMAT
         );
 
-        if (!$file) {
+        if (!$file || !is_array($file)) {
             throw new HashException('this file is not hashed');
         }
 

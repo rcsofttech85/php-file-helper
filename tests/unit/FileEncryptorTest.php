@@ -15,7 +15,7 @@ class FileEncryptorTest extends BaseTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->fileEncryptor = self::$containerBuilder->get('file_encryptor');
+        $this->fileEncryptor = $this->setObjectHandler(FileEncryptor::class, 'file_encryptor');
     }
 
     protected function tearDown(): void
@@ -37,7 +37,7 @@ class FileEncryptorTest extends BaseTest
 
 
     #[Test]
-    public function throwExceptionOnDecryptingNonEncryptedFile()
+    public function throwExceptionOnDecryptingNonEncryptedFile(): void
     {
         $this->expectException(FileEncryptorException::class);
         $this->expectExceptionMessage('file is not encrypted');
@@ -45,7 +45,7 @@ class FileEncryptorTest extends BaseTest
     }
 
     #[Test]
-    public function canEncryptFile()
+    public function canEncryptFile(): void
     {
         $isFileEncrypted = $this->fileEncryptor->encryptFile();
 
@@ -53,7 +53,7 @@ class FileEncryptorTest extends BaseTest
     }
 
     #[Test]
-    public function throwExceptionIfAlreadyEncrypted()
+    public function throwExceptionIfAlreadyEncrypted(): void
     {
         $this->expectException(FileEncryptorException::class);
         $this->expectExceptionMessage('file is already encrypted');
@@ -61,7 +61,7 @@ class FileEncryptorTest extends BaseTest
     }
 
     #[Test]
-    public function throwExceptionIfDecryptionFails()
+    public function throwExceptionIfDecryptionFails(): void
     {
         $fileEncryptor = new FileEncryptor('movie.csv', 'wrong');
 
@@ -71,7 +71,7 @@ class FileEncryptorTest extends BaseTest
     }
 
     #[Test]
-    public function canDecryptFile()
+    public function canDecryptFile(): void
     {
         $isFileDecrypted = $this->fileEncryptor->decryptFile();
 

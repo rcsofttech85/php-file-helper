@@ -16,6 +16,9 @@ class FileDiffCommandTest extends TestCase
         unlink('old');
     }
 
+    /**
+     * @return iterable<array<string>>
+     */
     public static function commandArgumentProvider(): iterable
     {
         file_put_contents("old", "this is old file" . PHP_EOL, FILE_APPEND);
@@ -29,7 +32,11 @@ class FileDiffCommandTest extends TestCase
         yield ['old', 'new', 'old (Line 2):'];
     }
 
-    public static function matchingDataProvider(): iterable
+    /**
+     * @return iterable<array<string>>
+     */
+
+    public static function fileWithSameDataProvider(): iterable
     {
         file_put_contents("old", "this has matching content" . PHP_EOL, FILE_APPEND);
         file_put_contents("new", "this has matching content" . PHP_EOL, FILE_APPEND);
@@ -40,7 +47,7 @@ class FileDiffCommandTest extends TestCase
 
     #[Test]
     #[DataProvider('commandArgumentProvider')]
-    public function fileDiffShowsCorrectChanges(string $oldFile, string $newFile, string $expected)
+    public function fileDiffShowsCorrectChanges(string $oldFile, string $newFile, string $expected): void
     {
         $command = "php bin/file-diff $oldFile $newFile";
         exec($command, $output, $exitCode);
@@ -54,7 +61,7 @@ class FileDiffCommandTest extends TestCase
     }
 
     #[Test]
-    public function throwsExceptionIfArgumentIsNotValidFile()
+    public function throwsExceptionIfArgumentIsNotValidFile(): void
     {
         $command = "php bin/file-diff unknown unknown";
         exec($command, $output, $exitCode);
@@ -68,8 +75,8 @@ class FileDiffCommandTest extends TestCase
     }
 
     #[Test]
-    #[DataProvider('matchingDataProvider')]
-    public function sameContentShouldNotBeDisplayedInTheResult(string $oldFile, string $newFile, string $expected)
+    #[DataProvider('fileWithSameDataProvider')]
+    public function sameContentShouldNotBeDisplayedInTheResult(string $oldFile, string $newFile, string $expected): void
     {
         $command = "php bin/file-diff $oldFile $newFile";
         exec($command, $output, $exitCode);

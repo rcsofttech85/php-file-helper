@@ -20,19 +20,36 @@ class TempFileHandler
         }
     }
 
+    /**
+     * @param string $tempFilePath
+     * @param array<string> $row
+     * @return void
+     */
     public function writeRowToTempFile(string $tempFilePath, array $row): void
     {
         $tempFileHandle = fopen($tempFilePath, 'a');
-        fputs($tempFileHandle, implode(',', $row) . PHP_EOL);
-        fclose($tempFileHandle);
+        if ($tempFileHandle) {
+            fputs($tempFileHandle, implode(',', $row) . PHP_EOL);
+            fclose($tempFileHandle);
+        }
     }
 
-    public function createTempFileWithHeaders(array $headers): string
+    /**
+     * @param array<string> $headers
+     * @return string
+     */
+    public function createTempFileWithHeaders(array $headers): string|false
     {
         $tempFilePath = tempnam(sys_get_temp_dir(), 'tempfile_');
+        if (!$tempFilePath) {
+            return false;
+        }
         $tempFileHandle = fopen($tempFilePath, 'w');
-        fputs($tempFileHandle, implode(',', $headers) . PHP_EOL);
-        fclose($tempFileHandle);
+        if ($tempFileHandle) {
+            fputs($tempFileHandle, implode(',', $headers) . PHP_EOL);
+            fclose($tempFileHandle);
+        }
+
 
         return $tempFilePath;
     }

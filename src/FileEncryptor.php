@@ -47,6 +47,9 @@ readonly class FileEncryptor
         $output = bin2hex($nonce . $ciphertext);
 
         $file = fopen($this->filename, 'w');
+        if (!$file) {
+            return false;
+        }
 
         try {
             fwrite($file, $output);
@@ -76,6 +79,9 @@ readonly class FileEncryptor
         }
 
         $bytes = hex2bin($encryptedData);
+        if (!$bytes) {
+            return false;
+        }
         $nonce = substr($bytes, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
         $ciphertext = substr($bytes, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
 
@@ -89,6 +95,9 @@ readonly class FileEncryptor
 
 
         $file = fopen($this->filename, 'w');
+        if (!$file) {
+            return false;
+        }
 
         try {
             fwrite($file, $plaintext);
