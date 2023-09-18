@@ -209,9 +209,13 @@ class CsvFileHandler
      * @param string $keyword
      * @param string $replace
      * @return int
+     * @throws FileHandlerException
      */
     private function replaceKeywordInColumn(array &$row, string $column, string $keyword, string $replace): int
     {
+        if (!array_key_exists($column, $row)) {
+            throw new FileHandlerException("invalid column name");
+        }
         $count = 0;
 
         if ($keyword === $row[$column]) {

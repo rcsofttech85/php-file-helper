@@ -37,6 +37,15 @@ class CsvFileHandlerTest extends BaseTest
         $this->csvFileHandler = null;
     }
 
+    #[Test]
+    #[DataProvider("wrongColumnNameProvider")]
+    public function throwExceptionIfWrongColumnNameProvided(string $columnName): void
+    {
+        $this->expectException(FileHandlerException::class);
+        $this->expectExceptionMessage("invalid column name");
+        $this->csvFileHandler->findAndReplaceInCsv("movie.csv", "Twilight", "hello", $columnName);
+    }
+
 
     #[Test]
     public function findAndReplaceInCsvMethodShouldReplaceTextWithoutColumnOption(): void
@@ -201,5 +210,14 @@ class CsvFileHandlerTest extends BaseTest
         yield [$file1];
         yield [$file2];
         yield [$file3];
+    }
+
+    /**
+     * @return iterable<array<string>>
+     */
+    public static function wrongColumnNameProvider(): iterable
+    {
+        yield ["wrong"];
+        yield ["honey bee"];
     }
 }
