@@ -20,7 +20,7 @@ class BaseTest extends TestCase
     {
         parent::setUpBeforeClass();
         self::$containerBuilder = new ContainerBuilder();
-        $loader = new YamlFileLoader(self::$containerBuilder, new FileLocator(__DIR__ . '/../../src/config'), 'dev');
+        $loader = new YamlFileLoader(self::$containerBuilder, new FileLocator(__DIR__ . '/../../src/config'));
         $loader->load('services.yaml');
 
         $content = "Film,Genre,Lead Studio,Audience score %,Profitability,Rotten Tomatoes %,Worldwide Gross,Year\n"
