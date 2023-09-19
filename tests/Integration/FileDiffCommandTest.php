@@ -3,9 +3,11 @@
 namespace Integration;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
+#[Group("integration")]
 class FileDiffCommandTest extends TestCase
 {
     public static function tearDownAfterClass(): void
@@ -57,7 +59,7 @@ class FileDiffCommandTest extends TestCase
         $this->assertStringContainsString($expected, $actualOutput);
 
 
-        $this->assertEquals(0, $exitCode);
+        $this->assertSame(0, $exitCode);
     }
 
     #[Test]
@@ -86,6 +88,6 @@ class FileDiffCommandTest extends TestCase
         $expected = "Old (Line 3)";
 
         $this->assertStringNotContainsString($expected, $actualOutput);
-        $this->assertEquals(0, $exitCode);
+        $this->assertSame(0, $exitCode);
     }
 }
