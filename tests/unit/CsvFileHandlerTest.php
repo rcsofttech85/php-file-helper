@@ -111,6 +111,20 @@ class CsvFileHandlerTest extends BaseTest
         $this->assertEquals($expected, $data[0]);
     }
 
+    /**
+     * @param array<string> $columnsToHide
+     * @param array<string,string> $expected
+     * @return void
+     * @throws FileHandlerException
+     */
+    #[Test]
+    #[DataProvider('columnsToHideDataProvider')]
+    public function toArrayMethodWithHideColumnsOptionReturnsValidArray(array $columnsToHide, array $expected): void
+    {
+        $data = $this->csvFileHandler->toArray("movie.csv", $columnsToHide);
+        $this->assertEquals($expected, $data[0]);
+    }
+
     #[Test]
     public function searchByKeywordAndReturnArray(): void
     {
@@ -219,5 +233,38 @@ class CsvFileHandlerTest extends BaseTest
     {
         yield ["wrong"];
         yield ["honey bee"];
+    }
+
+    /**
+     * @return iterable<array<array<string>>>
+     */
+    public static function columnsToHideDataProvider(): iterable
+    {
+        $hideSingleColumn = ["Film"];
+        $expected1 = [
+            'Genre' => 'Romance',
+            'Lead Studio' => 'The Weinstein Company',
+            'Audience score %' => '70',
+            'Profitability' => '1.747541667',
+            'Rotten Tomatoes %' => '64',
+            'Worldwide Gross' => '$41.94 ',
+            'Year' => '2008'
+
+        ];
+
+        $hideMultipleColumns = ["Film", "Profitability", "Year"];
+        $expected2 = [
+            'Genre' => 'Romance',
+            'Lead Studio' => 'The Weinstein Company',
+            'Audience score %' => '70',
+            'Rotten Tomatoes %' => '64',
+            'Worldwide Gross' => '$41.94 ',
+
+
+        ];
+
+
+        yield [$hideSingleColumn, $expected1];
+        yield [$hideMultipleColumns, $expected2];
     }
 }

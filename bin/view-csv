@@ -5,19 +5,25 @@ require 'vendor/autoload.php';
 
 use rcsofttech85\FileHandler\CsvFileHandler;
 use rcsofttech85\FileHandler\DI\ServiceContainer;
+use rcsofttech85\FileHandler\Exception\FileHandlerException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\SingleCommandApplication;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 $command = (new SingleCommandApplication())
     ->addArgument('csvFile', InputArgument::REQUIRED, 'csv file name')
+    ->addOption('hide-column', null, InputOption::VALUE_REQUIRED, 'Columns to hide (comma-separated)')
     ->setCode(function (InputInterface $input, OutputInterface $output): int {
         $io = new SymfonyStyle($input, $output);
         $csvFile = $input->getArgument('csvFile');
 
+        $hiddenColumns = $input->getOption('hide-column');
+
+        $hiddenColumnsArray = explode(',', $hiddenColumns);
 
         if (!file_exists($csvFile)) {
             $io->error("{$csvFile} does not exists");
@@ -28,23 +34,20 @@ $command = (new SingleCommandApplication())
         /** @var CsvFileHandler $csvFileHandler */
         $csvFileHandler = $serviceContainer->getContainerBuilder()->get('csv_file_handler');
 
-        $io->title($csvFile);
-        $table = $io->createTable();
-        $headers = $csvFileHandler->extractHeader($csvFile);
-
-        if (!$headers) {
+        try {
+            $data = $csvFileHandler->toArray($csvFile, $hiddenColumnsArray);
+        } catch (FileHandlerException) {
             $io->error('invalid csv file');
             return Command::FAILURE;
         }
 
-
+        $headers = array_keys($data[0]);
+        $io->title($csvFile);
+        $table = $io->createTable();
         $table->setHeaders($headers);
-        $table->setRows($csvFileHandler->toArray($csvFile));
-
+        $table->setRows($data);
         $table->render();
-
         $io->newLine();
-
 
         return Command::SUCCESS;
     })->run();
