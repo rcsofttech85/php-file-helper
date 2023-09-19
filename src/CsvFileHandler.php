@@ -49,16 +49,17 @@ class CsvFileHandler
 
     /**
      * @param string $filename
+     * @param array<string> $hideColumns
      * @return array<int,array<string,string>>
      * @throws FileHandlerException
      */
-    public function toArray(string $filename): array
+    public function toArray(string $filename, array|false $hideColumns = false): array
     {
         if (!file_exists($filename)) {
             throw new FileHandlerException('file not found');
         }
 
-        return iterator_to_array($this->getRows($filename));
+        return iterator_to_array($this->getRows($filename, $hideColumns));
     }
 
     public function findAndReplaceInCsv(
@@ -107,7 +108,7 @@ class CsvFileHandler
      * @return array<string>|false
      */
 
-    public function extractHeader(mixed $file): array|false
+    private function extractHeader(mixed $file): array|false
     {
         $headers = [];
         if (is_resource($file)) {
@@ -147,11 +148,33 @@ class CsvFileHandler
     }
 
     /**
+     * @param array<string> $row
+     * @param array<string> $hideColumns
+     * @return array<int<0, max>,int|string>
+     */
+    private function setColumnsToHide(array &$row, array $hideColumns): array
+    {
+        $indices = [];
+        if (!empty($hideColumns)) {
+            foreach ($hideColumns as $hideColumn) {
+                $index = array_search($hideColumn, $row);
+                if ($index !== false) {
+                    $indices[] = $index;
+                    unset($row[$index]);
+                }
+            }
+            $row = array_values($row);
+        }
+        return $indices;
+    }
+
+    /**
      * @param string $filename
+     * @param array<string>|false $hideColumns
      * @return Generator
      * @throws FileHandlerException
      */
-    private function getRows(string $filename): Generator
+    private function getRows(string $filename, array|false $hideColumns = false): Generator
     {
         $csvFile = fopen($filename, 'r');
         if (!$csvFile) {
@@ -162,6 +185,10 @@ class CsvFileHandler
             throw new FileHandlerException('could not extract header');
         }
 
+        if (is_array($hideColumns)) {
+            $indices = $this->setColumnsToHide($headers, $hideColumns);
+        }
+
 
         $isEmptyFile = true;
         try {
@@ -170,6 +197,17 @@ class CsvFileHandler
                 if (!$this->isValidCsvFileFormat($row)) {
                     throw new FileHandlerException('invalid csv file format');
                 }
+
+                if (!empty($indices)) {
+                    foreach ($indices as $index) {
+                        if (isset($row[$index])) {
+                            unset($row[$index]);
+                        }
+                    }
+
+                    $row = array_values($row);
+                }
+
                 $item = array_combine($headers, $row);
 
                 yield $item;
