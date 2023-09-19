@@ -33,7 +33,7 @@ $command = (new SingleCommandApplication())
         $headers = $csvFileHandler->extractHeader($csvFile);
 
         if (!$headers) {
-            $io->error('could not extract headers');
+            $io->error('invalid csv file');
             return Command::FAILURE;
         }
 

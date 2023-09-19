@@ -68,6 +68,9 @@ class ViewCsvCommandTest extends TestCase
     {
         $command = "php bin/view-csv {$file}";
         exec($command, $output, $exitCode);
+        $actualOutput = implode("\n", $output);
+
+        $this->assertStringContainsString('invalid csv file', $actualOutput);
         $this->assertSame(1, $exitCode);
         unlink($file);
     }
