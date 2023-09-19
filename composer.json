@@ -33,6 +33,7 @@
     "symfony/var-dumper": "^6.3"
   },
   "bin": [
-    "bin/file-diff"
+    "bin/file-diff",
+    "bin/view-csv"
   ]
 }

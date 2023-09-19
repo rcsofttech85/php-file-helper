@@ -107,7 +107,7 @@ class CsvFileHandler
      * @return array<string>|false
      */
 
-    private function extractHeader(mixed $file): array|false
+    public function extractHeader(mixed $file): array|false
     {
         $headers = [];
         if (is_resource($file)) {
