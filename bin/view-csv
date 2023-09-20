@@ -17,25 +17,32 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 $command = (new SingleCommandApplication())
     ->addArgument('csvFile', InputArgument::REQUIRED, 'csv file name')
     ->addOption('hide-column', null, InputOption::VALUE_REQUIRED, 'Columns to hide (comma-separated)')
+    ->addOption('limit', null, InputOption::VALUE_REQUIRED, 'limit number of records')
     ->setCode(function (InputInterface $input, OutputInterface $output): int {
         $io = new SymfonyStyle($input, $output);
         $csvFile = $input->getArgument('csvFile');
-
         $hiddenColumns = $input->getOption('hide-column');
-
-        $hiddenColumnsArray = explode(',', $hiddenColumns);
+        $limit = $input->getOption('limit');
 
         if (!file_exists($csvFile)) {
             $io->error("{$csvFile} does not exists");
             return Command::FAILURE;
         }
 
+        if (isset($limit) && !is_numeric($limit)) {
+            $io->error("{$limit} is not numeric");
+            return Command::FAILURE;
+        }
+
+        $hiddenColumns = $hiddenColumns ? explode(',', $hiddenColumns) : false;
+        $limit = $limit ? (int)$limit : false;
+
         $serviceContainer = new ServiceContainer();
         /** @var CsvFileHandler $csvFileHandler */
         $csvFileHandler = $serviceContainer->getContainerBuilder()->get('csv_file_handler');
 
         try {
-            $data = $csvFileHandler->toArray($csvFile, $hiddenColumnsArray);
+            $data = $csvFileHandler->toArray($csvFile, $hiddenColumns, $limit);
         } catch (FileHandlerException) {
             $io->error('invalid csv file');
             return Command::FAILURE;

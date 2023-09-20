@@ -126,6 +126,17 @@ class CsvFileHandlerTest extends BaseTest
     }
 
     #[Test]
+    #[DataProvider('limitDataProvider')]
+    public function toArrayMethodShouldRestrictNumberOfRecordsWhenLimitIsSet(int $limit): void
+    {
+        $data = $this->csvFileHandler->toArray("movie.csv", ["Year"], $limit);
+
+        $count = count($data);
+
+        $this->assertSame($count, $limit);
+    }
+
+    #[Test]
     public function searchByKeywordAndReturnArray(): void
     {
         $expected = [
@@ -266,5 +277,15 @@ class CsvFileHandlerTest extends BaseTest
 
         yield [$hideSingleColumn, $expected1];
         yield [$hideMultipleColumns, $expected2];
+    }
+
+    /**
+     * max limit for the test file is 3
+     * @return iterable<array<int>>
+     */
+    public static function limitDataProvider(): iterable
+    {
+        yield [1];
+        yield [2];
     }
 }
