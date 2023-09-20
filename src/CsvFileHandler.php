@@ -171,6 +171,7 @@ class CsvFileHandler
     /**
      * @param string $filename
      * @param array<string>|false $hideColumns
+     * @param int|false $limit
      * @return Generator
      * @throws FileHandlerException
      */
@@ -180,18 +181,18 @@ class CsvFileHandler
         if (!$csvFile) {
             throw new FileHandlerException('file not found');
         }
+
         $headers = $this->extractHeader($csvFile);
         if (!is_array($headers)) {
+            fclose($csvFile);
             throw new FileHandlerException('could not extract header');
         }
 
-        if (is_array($hideColumns)) {
-            $indices = $this->setColumnsToHide($headers, $hideColumns);
-        }
-
+        $indices = is_array($hideColumns) ? $this->setColumnsToHide($headers, $hideColumns) : [];
 
         $isEmptyFile = true;
         $count = 0;
+
         try {
             while (($row = fgetcsv($csvFile)) !== false) {
                 $isEmptyFile = false;
@@ -202,7 +203,6 @@ class CsvFileHandler
                 if (!empty($indices)) {
                     $this->removeElementByIndex($row, $indices);
                 }
-
 
                 $item = array_combine($headers, $row);
                 yield $item;
@@ -216,11 +216,11 @@ class CsvFileHandler
             fclose($csvFile);
         }
 
-
         if ($isEmptyFile) {
             throw new FileHandlerException('invalid csv file format');
         }
     }
+
 
     /**
      * @param array<int,string> $row
