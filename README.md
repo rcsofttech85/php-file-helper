@@ -194,6 +194,13 @@ $fileHasher->verifyHash($hashListFile);
 
 ```
 
+**open csv file in terminal**
+
+```
+vendor/bin/view-csv movies.csv --hide-column Film --limit 5
+
+```
+
 
 
 
