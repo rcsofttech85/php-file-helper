@@ -63,8 +63,19 @@ class ViewCsvCommandTest extends TestCase
     }
 
     #[Test]
+    public function IfLimitIsSetToNonNumericCommandShouldFail(): void
+    {
+        $command = "php bin/view-csv movie.csv --limit hello";
+        exec($command, $output, $exitCode);
+        $actualOutput = implode("\n", $output);
+
+        $this->assertSame(1, $exitCode);
+        $this->assertStringContainsString("hello is not numeric", $actualOutput);
+    }
+
+    #[Test]
     #[DataProvider('InvalidFileProvider')]
-    public function throwExceptionIfFileIsInvalid(string $file): void
+    public function commandShouldReturnErrorIfFileIsInvalid(string $file): void
     {
         $command = "php bin/view-csv {$file}";
         exec($command, $output, $exitCode);
