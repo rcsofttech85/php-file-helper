@@ -23,3 +23,7 @@ services:
   file_hash:
     class: 'rcsofttech85\FileHandler\FileHashChecker'
     arguments: [ '%filename%','@csv_file_handler' ]
+
+  json_file_handler:
+    class: 'rcsofttech85\FileHandler\JsonFileHandler'
+
