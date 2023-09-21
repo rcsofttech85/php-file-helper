@@ -1,31 +1,64 @@
+# PHP File Helper
+
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c6450a9c0f99488e93b34911f1adfb2e)](https://app.codacy.com/gh/rcsofttech85/php-file-helper/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/c6450a9c0f99488e93b34911f1adfb2e)](https://app.codacy.com/gh/rcsofttech85/php-file-helper/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 
-**A simple php file helper** ✨
+A simple PHP file helper for various file operations.
 
-==========================================
+---
 
-**Installation**
+## Table of Contents
 
-```
+- [About](#about)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Search by Keyword](#search-by-keyword)
+  - [Search by keyword and return array](#search-and-return-array)
+  - [Write Multiple Files](#write-multiple-files-simultaneously)
+  - [Converting File to Array](#converting-file-to-an-array)
+  - [Find and Replace in CSV](#find-and-replace-in-csv-file)
+  - [Converting File to JSON](#converting-file-to-json-format)
+  - [Encrypt and Decrypt Files](#encrypt-and-decrypt-files)
+  - [Stream and Save Content from URL](#stream-and-save-content-from-url-to-file)
+  - [File Compression and Decompression](#file-compression-and-decompression)
+  - [File Difference](#file-difference)
+  - [File Integrity check](#file-integrity-check)
+  - [View CSV in Terminal(table format)](#view-csv-in-terminal)
+  - [View Json in Terminal(table format)](#view-json-in-terminal)
+
+---
+
+## About
+
+This PHP File Helper is designed to simplify various file-related operations. It offers a range of features to handle
+tasks such as searching for keywords in files, converting files to different formats, encrypting and decrypting files,
+and more. Whether you're working with CSV, JSON, or plain text files, this library can streamline your file management
+processes.
+
+## Installation
+
+You can install this PHP File Helper library via Composer:
+
+```bash
 composer require rcsofttech85/file-handler
 
 ```
 
-**search by a keyword in file**
+## Usage
+
+## search by keyword
 
 ```
-$temp = new TempFileHandler();
-$csv = new CsvFileHandler($temp);
+     $temp = new TempFileHandler();
+     $csv = new CsvFileHandler($temp);
 
-$findByKeyword = $csv->searchInCsvFile("movies.csv","Twilight","Film");
+     $findByKeyword = $csv->searchInCsvFile("movies.csv","Twilight","Film");
 
 
 ```
 
-**search by a keyword in file and return array**
-
+## Search and return array
 ```
 $temp = new TempFileHandler();
 $csv = new CsvFileHandler($temp);
@@ -48,7 +81,7 @@ $findByKeyword = $csv->searchInCsvFile("movies.csv","Twilight","Film",FileHandle
  ];
 ```
 
-**Write multiple file simultaneously:**
+## Write multiple files simultaneously
 
 ```
 $fileHandler = new FileHandler();
@@ -63,7 +96,7 @@ $fileHandler->close();
 
 ```
 
-**converting file to an array**
+## Converting file to an array
 
 ```
 
@@ -86,7 +119,7 @@ $data[0] = [
 
 ```
 
-**Find and replace in csv file**
+## Find and replace in csv file
 
 ```
 
@@ -108,7 +141,7 @@ $findByKeyword = $csv->findAndReplaceInCsv("movies.csv","Inception","Twilight",c
 
 ```
 
-**converting file to a json format**
+## Converting file to json format
 
 ```
 
@@ -122,7 +155,7 @@ $findByKeyword = $csv->toJson("movies.csv");
 
 ```
 
-**Encrypt a file**
+## Encrypt and decrypt files
 
 ```
 
@@ -130,21 +163,11 @@ $secret = getenv('SECRET_KEY');
 
 $fileEncryptor = new FileEncryptor('movie.csv', $secret);
 $fileEncryptor->encryptFile();
-
-```
-
-**Decrypt a file**
-
-```
-
-$secret = getenv('SECRET_KEY');
-
-$fileEncryptor = new FileEncryptor('movie.csv', $secret);
 $fileEncryptor->decryptFile();
 
 ```
 
-**Streaming and Saving Content from URL to File**
+## Stream and save content from url to file
 
 ```
 
@@ -154,7 +177,7 @@ $fileEncryptor->decryptFile();
 
 ```
 
-**File Compression**
+## File compression and decompression
 
 ```
 
@@ -163,11 +186,7 @@ $fileEncryptor->decryptFile();
 
         $this->fileHandler->compress($testFile, $compressedZipFilename);
 
-```
 
-**File Decompression**
-
-```
 
         $compressedZipFilename = 'compressed.zip';
         $extractPath = 'extracted_contents';
@@ -176,14 +195,14 @@ $fileEncryptor->decryptFile();
 
 ```
 
-**File Difference**
+## File Difference
 
 ```
 vendor/bin/file-diff oldFile newFile
 
 ```
 
-**File Integrity check**
+## File Integrity Check
 
 ```
 $fileHasher = new FileHashChecker();
@@ -194,12 +213,20 @@ $fileHasher->verifyHash($hashListFile);
 
 ```
 
-**open csv file in terminal**
+## View csv in terminal
 
 ```
 vendor/bin/view-csv movies.csv --hide-column Film --limit 5
 
 ```
+
+## View json in terminal
+
+```
+vendor/bin/view-json movies.json --hide-column Film --limit 5
+
+```
+
 
 
 
