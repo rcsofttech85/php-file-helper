@@ -8,27 +8,6 @@ A simple PHP file helper for various file operations.
 
 ---
 
-## Table of Contents
-
-- [About](#about)
-- [Installation](#installation)
-- [Usage](#usage)
-  - [Search by Keyword](#search-by-keyword)
-  - [Search by keyword and return array](#search-and-return-array)
-  - [Write Multiple Files](#write-multiple-files-simultaneously)
-  - [Converting File to Array](#converting-file-to-an-array)
-  - [Find and Replace in CSV](#find-and-replace-in-csv-file)
-  - [Converting File to JSON](#converting-file-to-json-format)
-  - [Encrypt and Decrypt Files](#encrypt-and-decrypt-files)
-  - [Stream and Save Content from URL](#stream-and-save-content-from-url-to-file)
-  - [File Compression and Decompression](#file-compression-and-decompression)
-  - [File Difference](#file-difference)
-  - [File Integrity check](#file-integrity-check)
-  - [View CSV in Terminal(table format)](#view-csv-in-terminal)
-  - [View Json in Terminal(table format)](#view-json-in-terminal)
-
----
-
 ## About
 
 This PHP File Helper is designed to simplify various file-related operations. It offers a range of features to handle
