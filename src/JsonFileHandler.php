@@ -50,13 +50,14 @@ readonly class JsonFileHandler
             throw new FileHandlerException("{$filename} is not valid");
         }
 
-        $contents = json_decode($jsonContents, true);
-        if (!$contents || json_last_error() !== JSON_ERROR_NONE) {
+
+        if (!$contents = $this->isValidJson($jsonContents)) {
             throw new FileHandlerException(json_last_error_msg());
         }
 
+
         $count = 0;
-        $headers = array_keys(reset($contents));
+        $headers = array_keys($contents[0]);
         $indices = is_array($hideColumns) ? $this->setColumnsToHide($headers, $hideColumns) : [];
         foreach ($contents as $content) {
             if (!empty($indices)) {
@@ -70,5 +71,39 @@ readonly class JsonFileHandler
                 break;
             }
         }
+    }
+
+    /**
+     * @param string $jsonData
+     * @return array<int,array<string,string>>|false
+     */
+    private function isValidJson(string $jsonData): array|false
+    {
+        $data = json_decode($jsonData, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return false;
+        }
+
+
+        if (!is_array($data)) {
+            return false;
+        }
+
+        if (!isset($data[0]) || !is_array($data[0])) {
+            return false;
+        }
+
+        $firstArrayKeys = array_keys($data[0]);
+
+        foreach ($data as $item) {
+            $currentArrayKeys = array_keys($item);
+
+            if ($firstArrayKeys !== $currentArrayKeys) {
+                return false;
+            }
+        }
+
+        return $data;
     }
 }

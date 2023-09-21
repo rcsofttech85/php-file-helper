@@ -50,6 +50,38 @@ $command = (new SingleCommandApplication())
             );
         } catch (FileHandlerException) {
             $io->error('invalid json file');
+            $io->writeln(
+                '
+                Expected Format
+  =======================================
+    
+  [
+     
+    {
+      "title": "The Catcher in the Rye",
+      "author": "J.D. Salinger",
+      "published_year": 1951
+    },
+    {
+      "title": "To Kill a Mockingbird",
+      "author": "Harper Lee",
+      "published_year": 1960
+    },
+    {
+      "title": "1984",
+      "author": "George Orwell",
+      "published_year": 1949
+    }
+    
+  ]
+
+
+               
+  
+  =======================================
+            
+         '
+            );
             return Command::FAILURE;
         }
 
