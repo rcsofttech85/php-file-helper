@@ -59,6 +59,7 @@ composer require rcsofttech85/file-handler
 ```
 
 ## Search and return array
+
 ```
 $temp = new TempFileHandler();
 $csv = new CsvFileHandler($temp);
