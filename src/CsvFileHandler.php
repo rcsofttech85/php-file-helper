@@ -4,9 +4,12 @@ namespace rcsofttech85\FileHandler;
 
 use Generator;
 use rcsofttech85\FileHandler\Exception\FileHandlerException;
+use rcsofttech85\FileHandler\Utilities\RowColumnHelper;
 
 class CsvFileHandler
 {
+    use RowColumnHelper;
+
     public function __construct(
         private readonly TempFileHandler $tempFileHandler
     ) {
@@ -147,26 +150,6 @@ class CsvFileHandler
         return true;
     }
 
-    /**
-     * @param array<string> $headers
-     * @param array<string> $hideColumns
-     * @return array<int<0, max>,int>
-     */
-    private function setColumnsToHide(array &$headers, array $hideColumns): array
-    {
-        $indices = [];
-        if (!empty($hideColumns)) {
-            foreach ($hideColumns as $hideColumn) {
-                $index = array_search($hideColumn, $headers);
-                if ($index !== false) {
-                    $indices[] = (int)$index;
-                    unset($headers[$index]);
-                }
-            }
-            $headers = array_values($headers);
-        }
-        return $indices;
-    }
 
     /**
      * @param string $filename
@@ -221,22 +204,6 @@ class CsvFileHandler
         }
     }
 
-
-    /**
-     * @param array<int,string> $row
-     * @param array<int<0, max>, int> $indices
-     * @return void
-     */
-    private function removeElementByIndex(array &$row, array $indices): void
-    {
-        foreach ($indices as $index) {
-            if (isset($row[$index])) {
-                unset($row[$index]);
-            }
-        }
-
-        $row = array_values($row);
-    }
 
     /**
      * @param array<string> $row

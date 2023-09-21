@@ -21,6 +21,9 @@ $command = (new SingleCommandApplication())
     ->setCode(function (InputInterface $input, OutputInterface $output): int {
         $io = new SymfonyStyle($input, $output);
         $jsonFile = $input->getArgument('jsonFile');
+        $limit = $input->getOption('limit');
+        $hiddenColumns = $input->getOption('hide-column');
+        $hiddenColumns = $hiddenColumns ? explode(',', $hiddenColumns) : false;
 
         if (!file_exists($jsonFile)) {
             $io->error("{$jsonFile} does not exists");
@@ -31,14 +34,26 @@ $command = (new SingleCommandApplication())
         /** @var JsonFileHandler $jsonFileHandler */
         $jsonFileHandler = $serviceContainer->getContainerBuilder()->get('json_file_handler');
 
+        if (isset($limit) && !is_numeric($limit)) {
+            $io->error("{$limit} is not numeric");
+            return Command::FAILURE;
+        }
+
+        $limit = $limit ? (int)$limit : false;
+        $headers = [];
         try {
-            $data = $jsonFileHandler->toArray($jsonFile);
+            $data = $jsonFileHandler->toArray(
+                filename: $jsonFile,
+                headers: $headers,
+                hideColumns: $hiddenColumns,
+                limit: $limit
+            );
         } catch (FileHandlerException) {
             $io->error('invalid json file');
             return Command::FAILURE;
         }
 
-        $headers = array_keys(reset($data));
+
         $io->title($jsonFile);
         $table = $io->createTable();
         $table->setHeaders($headers);
