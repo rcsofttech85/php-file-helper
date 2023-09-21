@@ -1,11 +1,9 @@
 #!/usr/bin/env php
 <?php
 
-require 'vendor/autoload.php';
-
-use rcsofttech85\FileHandler\CsvFileHandler;
 use rcsofttech85\FileHandler\DI\ServiceContainer;
 use rcsofttech85\FileHandler\Exception\FileHandlerException;
+use rcsofttech85\FileHandler\JsonFileHandler;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,42 +12,34 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\SingleCommandApplication;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+require 'vendor/autoload.php';
+
 $command = (new SingleCommandApplication())
-    ->addArgument('csvFile', InputArgument::REQUIRED, 'csv file name')
+    ->addArgument('jsonFile', InputArgument::REQUIRED, 'json file name')
     ->addOption('hide-column', null, InputOption::VALUE_REQUIRED, 'Columns to hide (comma-separated)')
     ->addOption('limit', null, InputOption::VALUE_REQUIRED, 'limit number of records')
     ->setCode(function (InputInterface $input, OutputInterface $output): int {
         $io = new SymfonyStyle($input, $output);
-        $csvFile = $input->getArgument('csvFile');
-        $hiddenColumns = $input->getOption('hide-column');
-        $limit = $input->getOption('limit');
+        $jsonFile = $input->getArgument('jsonFile');
 
-        if (!file_exists($csvFile)) {
-            $io->error("{$csvFile} does not exists");
+        if (!file_exists($jsonFile)) {
+            $io->error("{$jsonFile} does not exists");
             return Command::FAILURE;
         }
-
-        if (isset($limit) && !is_numeric($limit)) {
-            $io->error("{$limit} is not numeric");
-            return Command::FAILURE;
-        }
-
-        $hiddenColumns = $hiddenColumns ? explode(',', $hiddenColumns) : false;
-        $limit = $limit ? (int)$limit : false;
 
         $serviceContainer = new ServiceContainer();
-        /** @var CsvFileHandler $csvFileHandler */
-        $csvFileHandler = $serviceContainer->getContainerBuilder()->get('csv_file_handler');
+        /** @var JsonFileHandler $jsonFileHandler */
+        $jsonFileHandler = $serviceContainer->getContainerBuilder()->get('json_file_handler');
 
         try {
-            $data = $csvFileHandler->toArray($csvFile, $hiddenColumns, $limit);
+            $data = $jsonFileHandler->toArray($jsonFile);
         } catch (FileHandlerException) {
-            $io->error('invalid csv file');
+            $io->error('invalid json file');
             return Command::FAILURE;
         }
 
         $headers = array_keys(reset($data));
-        $io->title($csvFile);
+        $io->title($jsonFile);
         $table = $io->createTable();
         $table->setHeaders($headers);
         $table->setRows($data);

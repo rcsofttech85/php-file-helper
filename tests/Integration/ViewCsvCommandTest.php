@@ -63,7 +63,7 @@ class ViewCsvCommandTest extends TestCase
     }
 
     #[Test]
-    public function IfLimitIsSetToNonNumericCommandShouldFail(): void
+    public function ifLimitIsSetToNonNumericCommandShouldFail(): void
     {
         $command = "php bin/view-csv movie.csv --limit hello";
         exec($command, $output, $exitCode);
