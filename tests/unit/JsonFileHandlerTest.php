@@ -50,6 +50,7 @@ class JsonFileHandlerTest extends TestCase
     {
         yield
         [
+
             [
                 [
                     'title' => 'The Catcher in the Rye',
