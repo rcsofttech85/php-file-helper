@@ -1,0 +1,6 @@
+{
+  "plugins": ["remark-lint", "remark-lint-list-item-indent"],
+  "settings": {
+    "list-item-indent": "space"
+  }
+}
