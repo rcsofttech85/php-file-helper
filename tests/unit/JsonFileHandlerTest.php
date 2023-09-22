@@ -5,8 +5,8 @@ namespace unit;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use rcsofttech85\FileHandler\Exception\FileHandlerException;
-use rcsofttech85\FileHandler\JsonFileHandler;
+use Rcsofttech85\FileHandler\Exception\FileHandlerException;
+use Rcsofttech85\FileHandler\JsonFileHandler;
 
 class JsonFileHandlerTest extends TestCase
 {

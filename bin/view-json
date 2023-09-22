@@ -1,9 +1,9 @@
 #!/usr/bin/env php
 <?php
 
-use rcsofttech85\FileHandler\DI\ServiceContainer;
-use rcsofttech85\FileHandler\Exception\FileHandlerException;
-use rcsofttech85\FileHandler\JsonFileHandler;
+use Rcsofttech85\FileHandler\DependencyInjection\ServiceContainer;
+use Rcsofttech85\FileHandler\Exception\FileHandlerException;
+use Rcsofttech85\FileHandler\JsonFileHandler;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;

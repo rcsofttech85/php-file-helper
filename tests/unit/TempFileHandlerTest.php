@@ -4,7 +4,7 @@ namespace unit;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use rcsofttech85\FileHandler\TempFileHandler;
+use Rcsofttech85\FileHandler\TempFileHandler;
 
 class TempFileHandlerTest extends TestCase
 {

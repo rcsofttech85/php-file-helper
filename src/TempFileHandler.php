@@ -1,8 +1,8 @@
 <?php
 
-namespace rcsofttech85\FileHandler;
+namespace Rcsofttech85\FileHandler;
 
-use rcsofttech85\FileHandler\Exception\FileHandlerException;
+use Rcsofttech85\FileHandler\Exception\FileHandlerException;
 
 class TempFileHandler
 {

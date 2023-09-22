@@ -4,8 +4,8 @@ namespace unit;
 
 use Base\BaseTest;
 use PHPUnit\Framework\Attributes\Test;
-use rcsofttech85\FileHandler\Exception\FileHandlerException;
-use rcsofttech85\FileHandler\FileHandler;
+use Rcsofttech85\FileHandler\Exception\FileHandlerException;
+use Rcsofttech85\FileHandler\FileHandler;
 
 class FileHandlerTest extends BaseTest
 {
@@ -98,10 +98,12 @@ class FileHandlerTest extends BaseTest
 
         $this->fileHandler->decompress($compressedZip, $extractPath);
 
-        $expectedContent = "Film,Genre,Lead Studio,Audience score %,Profitability,Rotten Tomatoes %,Worldwide Gross,Year\n"
-            . "Zack and Miri Make a Porno,Romance,The Weinstein Company,70,1.747541667,64,$41.94 ,2008\n"
-            . "Youth in Revolt,Comedy,The Weinstein Company,52,1.09,68,$19.62 ,2010\n"
-            . "Twilight,Romance,Independent,68,6.383363636,26,$702.17 ,2011";
+        $expectedContent = <<<EOD
+        Film,Genre,Lead Studio,Audience score %,Profitability,Rotten Tomatoes %,Worldwide Gross,Year
+        Zack and Miri Make a Porno,Romance,The Weinstein Company,70,1.747541667,64,\$41.94 ,2008
+        Youth in Revolt,Comedy,The Weinstein Company,52,1.09,68,\$19.62 ,2010
+        Twilight,Romance,Independent,68,6.383363636,26,\$702.17 ,2011
+        EOD;
 
         $this->assertEquals($expectedContent, file_get_contents("./extracted_contents/movie.csv"));
 

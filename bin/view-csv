@@ -3,9 +3,9 @@
 
 require 'vendor/autoload.php';
 
-use rcsofttech85\FileHandler\CsvFileHandler;
-use rcsofttech85\FileHandler\DI\ServiceContainer;
-use rcsofttech85\FileHandler\Exception\FileHandlerException;
+use Rcsofttech85\FileHandler\CsvFileHandler;
+use Rcsofttech85\FileHandler\DependencyInjection\ServiceContainer;
+use Rcsofttech85\FileHandler\Exception\FileHandlerException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;

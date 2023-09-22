@@ -1,9 +1,9 @@
 <?php
 
-namespace rcsofttech85\FileHandler;
+namespace Rcsofttech85\FileHandler;
 
 use Fiber;
-use rcsofttech85\FileHandler\Exception\StreamException;
+use Rcsofttech85\FileHandler\Exception\StreamException;
 use Throwable;
 
 class StreamHandler

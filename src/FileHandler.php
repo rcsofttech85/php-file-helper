@@ -1,9 +1,9 @@
 <?php
 
-namespace rcsofttech85\FileHandler;
+namespace Rcsofttech85\FileHandler;
 
 use finfo;
-use rcsofttech85\FileHandler\Exception\FileHandlerException;
+use Rcsofttech85\FileHandler\Exception\FileHandlerException;
 use ZipArchive;
 
 class FileHandler

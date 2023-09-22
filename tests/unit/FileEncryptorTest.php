@@ -4,8 +4,8 @@ namespace unit;
 
 use Base\BaseTest;
 use PHPUnit\Framework\Attributes\Test;
-use rcsofttech85\FileHandler\Exception\FileEncryptorException;
-use rcsofttech85\FileHandler\FileEncryptor;
+use Rcsofttech85\FileHandler\Exception\FileEncryptorException;
+use Rcsofttech85\FileHandler\FileEncryptor;
 
 class FileEncryptorTest extends BaseTest
 {

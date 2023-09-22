@@ -7,23 +7,23 @@ parameters:
 
 services:
   file_handler:
-    class: 'rcsofttech85\FileHandler\FileHandler'
+    class: 'Rcsofttech85\FileHandler\FileHandler'
 
   file_encryptor:
-    class: 'rcsofttech85\FileHandler\FileEncryptor'
+    class: 'Rcsofttech85\FileHandler\FileEncryptor'
     arguments: [ '%filename%','%secret%' ]
 
   temp_file_handler:
-    class: 'rcsofttech85\FileHandler\TempFileHandler'
+    class: 'Rcsofttech85\FileHandler\TempFileHandler'
 
   csv_file_handler:
-    class: 'rcsofttech85\FileHandler\CsvFileHandler'
+    class: 'Rcsofttech85\FileHandler\CsvFileHandler'
     arguments: [ '@temp_file_handler' ]
 
   file_hash:
-    class: 'rcsofttech85\FileHandler\FileHashChecker'
+    class: 'Rcsofttech85\FileHandler\FileHashChecker'
     arguments: [ '%filename%','@csv_file_handler' ]
 
   json_file_handler:
-    class: 'rcsofttech85\FileHandler\JsonFileHandler'
+    class: 'Rcsofttech85\FileHandler\JsonFileHandler'
 
