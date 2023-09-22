@@ -3,7 +3,7 @@
 namespace Base;
 
 use PHPUnit\Framework\TestCase;
-use rcsofttech85\FileHandler\DI\ServiceContainer;
+use Rcsofttech85\FileHandler\DependencyInjection\ServiceContainer;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class BaseTest extends TestCase

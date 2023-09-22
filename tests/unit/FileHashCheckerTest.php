@@ -4,7 +4,7 @@ namespace unit;
 
 use Base\BaseTest;
 use PHPUnit\Framework\Attributes\Test;
-use rcsofttech85\FileHandler\FileHashChecker;
+use Rcsofttech85\FileHandler\FileHashChecker;
 use Symfony\Component\Dotenv\Dotenv;
 
 class FileHashCheckerTest extends BaseTest
@@ -50,7 +50,8 @@ class FileHashCheckerTest extends BaseTest
 
         $this->assertEquals($expectedHash, $actualHash);
 
-        $expectedHash = "1050bcc2d7d840d634f067a22abb4cd693b1f2590849982e29a6f9bb28963f73392b63ea24ae17edfaa500ee62b9e5482b9648af0b2b7d941992af3b0f9cbd3b";
+        $expectedHash = "1050bcc2d7d840d634f067a22abb4cd693b1f2590849982e29a6f9bb28963f733" .
+            "92b63ea24ae17edfaa500ee62b9e5482b9648af0b2b7d941992af3b0f9cbd3b";
 
         $actualHash = $this->fileHash->hashFile(FileHashChecker::ALGO_512);
 

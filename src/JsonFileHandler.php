@@ -1,10 +1,10 @@
 <?php
 
-namespace rcsofttech85\FileHandler;
+namespace Rcsofttech85\FileHandler;
 
 use Generator;
-use rcsofttech85\FileHandler\Exception\FileHandlerException;
-use rcsofttech85\FileHandler\Utilities\RowColumnHelper;
+use Rcsofttech85\FileHandler\Exception\FileHandlerException;
+use Rcsofttech85\FileHandler\Utilities\RowColumnHelper;
 
 class JsonFileHandler
 {

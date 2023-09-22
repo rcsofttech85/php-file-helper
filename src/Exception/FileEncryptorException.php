@@ -1,6 +1,6 @@
 <?php
 
-namespace rcsofttech85\FileHandler\Exception;
+namespace Rcsofttech85\FileHandler\Exception;
 
 use Exception;
 use Throwable;

@@ -1,9 +1,9 @@
 <?php
 
-namespace rcsofttech85\FileHandler;
+namespace Rcsofttech85\FileHandler;
 
 use Exception;
-use rcsofttech85\FileHandler\Exception\FileEncryptorException;
+use Rcsofttech85\FileHandler\Exception\FileEncryptorException;
 use SensitiveParameter;
 use SodiumException;
 

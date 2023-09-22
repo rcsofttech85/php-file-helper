@@ -1,6 +1,6 @@
 <?php
 
-namespace rcsofttech85\FileHandler\Utilities;
+namespace Rcsofttech85\FileHandler\Utilities;
 
 trait RowColumnHelper
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace rcsofttech85\FileHandler\DI;
+namespace Rcsofttech85\FileHandler\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

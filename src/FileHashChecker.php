@@ -1,8 +1,8 @@
 <?php
 
-namespace rcsofttech85\FileHandler;
+namespace Rcsofttech85\FileHandler;
 
-use rcsofttech85\FileHandler\Exception\HashException;
+use Rcsofttech85\FileHandler\Exception\HashException;
 
 class FileHashChecker
 {
@@ -11,6 +11,7 @@ class FileHashChecker
 
     /**
      * @param string $filename
+     * @param CsvFileHandler $csvFileHandler
      * @throws HashException
      */
     public function __construct(private readonly string $filename, private readonly CsvFileHandler $csvFileHandler)
