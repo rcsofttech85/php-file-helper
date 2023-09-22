@@ -1,0 +1,7 @@
+patterns:
+  - patternId: list-item-spacing
+    file:
+      namePattern: "\.md$"
+    parameters:
+      type:
+        value: tab-size
