@@ -6,6 +6,7 @@ require 'vendor/autoload.php';
 use Rcsofttech85\FileHandler\CsvFileHandler;
 use Rcsofttech85\FileHandler\DependencyInjection\ServiceContainer;
 use Rcsofttech85\FileHandler\Exception\FileHandlerException;
+use Rcsofttech85\FileHandler\Validator\FileValidatorTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,7 +25,11 @@ $command = (new SingleCommandApplication())
         $hiddenColumns = $input->getOption('hide-column');
         $limit = $input->getOption('limit');
 
-        if (!file_exists($csvFile)) {
+        try {
+            $csvFile = (new class {
+                use FileValidatorTrait;
+            })->validateFileName($csvFile);
+        } catch (FileHandlerException) {
             $io->error("{$csvFile} does not exists");
             return Command::FAILURE;
         }
