@@ -5,7 +5,7 @@ namespace Rcsofttech85\FileHandler\Validator;
 use Rcsofttech85\FileHandler\DependencyInjection\ServiceContainer;
 use Rcsofttech85\FileHandler\Exception\FileHandlerException;
 
-class FileValidator
+trait FileValidatorTrait
 {
     /**
      * @param string $filename
@@ -13,7 +13,7 @@ class FileValidator
      * @return string
      * @throws FileHandlerException
      */
-    public static function validateFileName(string $filename, string|null $path = null): string
+    public function validateFileName(string $filename, string|null $path = null): string
     {
         $container = (new ServiceContainer())->getContainerBuilder();
 
@@ -41,7 +41,7 @@ class FileValidator
     /**
      * @throws FileHandlerException
      */
-    public static function sanitize(string $filename): string
+    public function sanitize(string $filename): string
     {
         $pattern = '/^[a-zA-Z0-9_.-]+$/';
         if (!preg_match($pattern, $filename)) {

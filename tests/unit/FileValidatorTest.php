@@ -5,10 +5,12 @@ namespace unit;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Rcsofttech85\FileHandler\Exception\FileHandlerException;
-use Rcsofttech85\FileHandler\Validator\FileValidator;
+use Rcsofttech85\FileHandler\Validator\FileValidatorTrait;
 
 class FileValidatorTest extends TestCase
 {
+    use FileValidatorTrait;
+
     #[Test]
     public function filenameIsValidAndSanitized(): void
     {
@@ -17,7 +19,7 @@ class FileValidatorTest extends TestCase
 
         $this->expectException(FileHandlerException::class);
         $this->expectExceptionMessage("path {$path} is not valid");
-        FileValidator::validateFileName($filename, $path);
+        $this->validateFileName($filename, $path);
     }
 
     /**
@@ -31,7 +33,7 @@ class FileValidatorTest extends TestCase
 
         file_put_contents($path . '/' . $filename, '');
         $this->expectNotToPerformAssertions();
-        FileValidator::validateFileName($filename, $path);
+        $this->validateFileName($filename, $path);
         unlink($path . '/' . $filename);
     }
 }

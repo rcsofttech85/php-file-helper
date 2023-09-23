@@ -5,11 +5,12 @@ namespace Rcsofttech85\FileHandler;
 use Generator;
 use Rcsofttech85\FileHandler\Exception\FileHandlerException;
 use Rcsofttech85\FileHandler\Utilities\RowColumnHelper;
-use Rcsofttech85\FileHandler\Validator\FileValidator;
+use Rcsofttech85\FileHandler\Validator\FileValidatorTrait;
 
 class CsvFileHandler
 {
     use RowColumnHelper;
+    use FileValidatorTrait;
 
     public function __construct(
         private readonly TempFileHandler $tempFileHandler
@@ -166,7 +167,7 @@ class CsvFileHandler
      */
     private function getRows(string $filename, array|false $hideColumns = false, int|false $limit = false): Generator
     {
-        $filename = FileValidator::validateFileName($filename);
+        $filename = $this->validateFileName($filename);
         $csvFile = fopen($filename, 'r');
         if (!$csvFile) {
             throw new FileHandlerException('file not found');

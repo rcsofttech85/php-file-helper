@@ -3,22 +3,23 @@
 namespace Rcsofttech85\FileHandler;
 
 use Rcsofttech85\FileHandler\Exception\HashException;
+use Rcsofttech85\FileHandler\Validator\FileValidatorTrait;
 
 class FileHashChecker
 {
+    use FileValidatorTrait;
+
     public const ALGO_256 = 'sha3-256';
     public const ALGO_512 = 'sha3-512';
 
     /**
      * @param string $filename
      * @param CsvFileHandler $csvFileHandler
-     * @throws HashException
+     * @throws Exception\FileHandlerException
      */
-    public function __construct(private readonly string $filename, private readonly CsvFileHandler $csvFileHandler)
+    public function __construct(private string $filename, private readonly CsvFileHandler $csvFileHandler)
     {
-        if (!file_exists($this->filename)) {
-            throw new HashException('file not found');
-        }
+        $this->filename = $this->validateFileName($filename);
     }
 
     /**

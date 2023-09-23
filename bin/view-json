@@ -4,6 +4,7 @@
 use Rcsofttech85\FileHandler\DependencyInjection\ServiceContainer;
 use Rcsofttech85\FileHandler\Exception\FileHandlerException;
 use Rcsofttech85\FileHandler\JsonFileHandler;
+use Rcsofttech85\FileHandler\Validator\FileValidatorTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,7 +26,11 @@ $command = (new SingleCommandApplication())
         $hiddenColumns = $input->getOption('hide-column');
         $hiddenColumns = $hiddenColumns ? explode(',', $hiddenColumns) : false;
 
-        if (!file_exists($jsonFile)) {
+        try {
+            $jsonFile = (new class {
+                use FileValidatorTrait;
+            })->validateFileName($jsonFile);
+        } catch (FileHandlerException) {
             $io->error("{$jsonFile} does not exists");
             return Command::FAILURE;
         }

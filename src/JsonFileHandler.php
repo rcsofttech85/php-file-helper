@@ -5,11 +5,12 @@ namespace Rcsofttech85\FileHandler;
 use Generator;
 use Rcsofttech85\FileHandler\Exception\FileHandlerException;
 use Rcsofttech85\FileHandler\Utilities\RowColumnHelper;
-use Rcsofttech85\FileHandler\Validator\FileValidator;
+use Rcsofttech85\FileHandler\Validator\FileValidatorTrait;
 
 class JsonFileHandler
 {
     use RowColumnHelper;
+    use FileValidatorTrait;
 
     /**
      * @param string $filename
@@ -36,7 +37,7 @@ class JsonFileHandler
 
     private function validateFile(string $filename): array
     {
-        $filename = FileValidator::validateFileName($filename);
+        $filename = $this->validateFileName($filename);
         $jsonContents = $this->getFileContents($filename);
         $contents = $this->parseJson($jsonContents);
         if (!$contents) {

@@ -4,11 +4,13 @@ namespace Rcsofttech85\FileHandler;
 
 use finfo;
 use Rcsofttech85\FileHandler\Exception\FileHandlerException;
-use Rcsofttech85\FileHandler\Validator\FileValidator;
+use Rcsofttech85\FileHandler\Validator\FileValidatorTrait;
 use ZipArchive;
 
 class FileHandler
 {
+    use FileValidatorTrait;
+
     public const ARRAY_FORMAT = 'array';
 
     /**
@@ -26,7 +28,7 @@ class FileHandler
         bool $include_path = false,
         mixed $context = null
     ): self {
-        $filename = FileValidator::sanitize($filename);
+        $filename = $this->sanitize($filename);
         $file = fopen($filename, $mode, $include_path, $context);
 
         if (!$file) {
@@ -63,7 +65,7 @@ class FileHandler
      */
     public function compress(string $filename, string $zipFilename): void
     {
-        $filename = FileValidator::validateFileName($filename);
+        $filename = $this->validateFileName($filename);
 
         $zip = new ZipArchive();
 
@@ -84,7 +86,7 @@ class FileHandler
      */
     public function getMimeType(string $filename): string
     {
-        $filename = FileValidator::validateFileName($filename);
+        $filename = $this->validateFileName($filename);
 
         $fileInfo = new finfo(FILEINFO_MIME_TYPE);
         $mimeType = $fileInfo->file($filename);
@@ -100,7 +102,7 @@ class FileHandler
      */
     public function decompress(string $zipFilename, string $extractPath = "./"): void
     {
-        $zipFilename = FileValidator::validateFileName($zipFilename);
+        $zipFilename = $this->validateFileName($zipFilename);
 
         $zip = new ZipArchive();
 
@@ -141,7 +143,7 @@ class FileHandler
      */
     public function delete(string $filename): void
     {
-        $filename = FileValidator::validateFileName($filename);
+        $filename = $this->validateFileName($filename);
 
         unlink($filename);
     }

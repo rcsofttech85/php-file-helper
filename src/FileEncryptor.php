@@ -5,12 +5,14 @@ namespace Rcsofttech85\FileHandler;
 use Exception;
 use Rcsofttech85\FileHandler\Exception\FileEncryptorException;
 use Rcsofttech85\FileHandler\Exception\FileHandlerException;
-use Rcsofttech85\FileHandler\Validator\FileValidator;
+use Rcsofttech85\FileHandler\Validator\FileValidatorTrait;
 use SensitiveParameter;
 use SodiumException;
 
 readonly class FileEncryptor
 {
+    use FileValidatorTrait;
+
     /**
      * @param string $filename
      * @param string $secret
@@ -21,7 +23,7 @@ readonly class FileEncryptor
         private string $filename,
         #[SensitiveParameter] private string $secret
     ) {
-        FileValidator::validateFileName($filename);
+        $this->validateFileName($filename);
     }
 
     /**
