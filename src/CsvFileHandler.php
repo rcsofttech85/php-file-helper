@@ -5,6 +5,7 @@ namespace Rcsofttech85\FileHandler;
 use Generator;
 use Rcsofttech85\FileHandler\Exception\FileHandlerException;
 use Rcsofttech85\FileHandler\Utilities\RowColumnHelper;
+use Rcsofttech85\FileHandler\Validator\FileValidator;
 
 class CsvFileHandler
 {
@@ -29,11 +30,6 @@ class CsvFileHandler
         string $column,
         string|null $format = null
     ): bool|array {
-        if (!file_exists($filename)) {
-            throw new FileHandlerException('file not found');
-        }
-
-
         foreach ($this->getRows($filename) as $row) {
             if ($keyword === $row[$column]) {
                 return ($format === FileHandler::ARRAY_FORMAT) ? $row : true;
@@ -42,6 +38,11 @@ class CsvFileHandler
         return false;
     }
 
+    /**
+     * @param string $filename
+     * @return string|false
+     * @throws FileHandlerException
+     */
 
     public function toJson(string $filename): string|false
     {
@@ -53,18 +54,23 @@ class CsvFileHandler
     /**
      * @param string $filename
      * @param array<string> $hideColumns
+     * @param int|false $limit
      * @return array<int,array<string,string>>
      * @throws FileHandlerException
      */
     public function toArray(string $filename, array|false $hideColumns = false, int|false $limit = false): array
     {
-        if (!file_exists($filename)) {
-            throw new FileHandlerException('file not found');
-        }
-
         return iterator_to_array($this->getRows($filename, $hideColumns, $limit));
     }
 
+    /**
+     * @param string $filename
+     * @param string $keyword
+     * @param string $replace
+     * @param string|null $column
+     * @return bool
+     * @throws FileHandlerException
+     */
     public function findAndReplaceInCsv(
         string $filename,
         string $keyword,
@@ -160,6 +166,7 @@ class CsvFileHandler
      */
     private function getRows(string $filename, array|false $hideColumns = false, int|false $limit = false): Generator
     {
+        $filename = FileValidator::validateFileName($filename);
         $csvFile = fopen($filename, 'r');
         if (!$csvFile) {
             throw new FileHandlerException('file not found');

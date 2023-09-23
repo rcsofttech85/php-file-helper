@@ -9,8 +9,6 @@ use Rcsofttech85\FileHandler\Validator\FileValidator;
 
 class FileValidatorTest extends TestCase
 {
-
-
     #[Test]
     public function filenameIsValidAndSanitized(): void
     {
@@ -26,7 +24,7 @@ class FileValidatorTest extends TestCase
      * @throws FileHandlerException
      */
     #[Test]
-    public function shouldNotThrowExceptionIfFileExists()
+    public function shouldNotThrowExceptionIfFileExists(): void
     {
         $filename = "sample";
         $path = __DIR__;

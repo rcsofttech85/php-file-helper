@@ -4,6 +4,7 @@ namespace Rcsofttech85\FileHandler;
 
 use finfo;
 use Rcsofttech85\FileHandler\Exception\FileHandlerException;
+use Rcsofttech85\FileHandler\Validator\FileValidator;
 use ZipArchive;
 
 class FileHandler
@@ -16,12 +17,16 @@ class FileHandler
     private null|array $files = [];
 
 
+    /**
+     * @throws FileHandlerException
+     */
     public function open(
         string $filename,
         string $mode = "w",
         bool $include_path = false,
         mixed $context = null
     ): self {
+        $filename = FileValidator::sanitize($filename);
         $file = fopen($filename, $mode, $include_path, $context);
 
         if (!$file) {
@@ -58,9 +63,7 @@ class FileHandler
      */
     public function compress(string $filename, string $zipFilename): void
     {
-        if (!file_exists($filename)) {
-            throw new FileHandlerException('File to compress does not exist.');
-        }
+        $filename = FileValidator::validateFileName($filename);
 
         $zip = new ZipArchive();
 
@@ -81,9 +84,7 @@ class FileHandler
      */
     public function getMimeType(string $filename): string
     {
-        if (!file_exists($filename)) {
-            throw new FileHandlerException('file does not exist.');
-        }
+        $filename = FileValidator::validateFileName($filename);
 
         $fileInfo = new finfo(FILEINFO_MIME_TYPE);
         $mimeType = $fileInfo->file($filename);
@@ -99,9 +100,7 @@ class FileHandler
      */
     public function decompress(string $zipFilename, string $extractPath = "./"): void
     {
-        if (!file_exists($zipFilename)) {
-            throw new FileHandlerException('ZIP archive does not exist.');
-        }
+        $zipFilename = FileValidator::validateFileName($zipFilename);
 
         $zip = new ZipArchive();
 
@@ -142,9 +141,8 @@ class FileHandler
      */
     public function delete(string $filename): void
     {
-        if (!file_exists($filename)) {
-            throw new FileHandlerException('file does not exists');
-        }
+        $filename = FileValidator::validateFileName($filename);
+
         unlink($filename);
     }
 }

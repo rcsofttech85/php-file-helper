@@ -4,18 +4,24 @@ namespace Rcsofttech85\FileHandler;
 
 use Exception;
 use Rcsofttech85\FileHandler\Exception\FileEncryptorException;
+use Rcsofttech85\FileHandler\Exception\FileHandlerException;
+use Rcsofttech85\FileHandler\Validator\FileValidator;
 use SensitiveParameter;
 use SodiumException;
 
 readonly class FileEncryptor
 {
+    /**
+     * @param string $filename
+     * @param string $secret
+     *
+     * @throws FileHandlerException
+     */
     public function __construct(
         private string $filename,
         #[SensitiveParameter] private string $secret
     ) {
-        if (!file_exists($this->filename)) {
-            throw new FileEncryptorException("File not found");
-        }
+        FileValidator::validateFileName($filename);
     }
 
     /**

@@ -5,6 +5,7 @@ namespace Rcsofttech85\FileHandler;
 use Generator;
 use Rcsofttech85\FileHandler\Exception\FileHandlerException;
 use Rcsofttech85\FileHandler\Utilities\RowColumnHelper;
+use Rcsofttech85\FileHandler\Validator\FileValidator;
 
 class JsonFileHandler
 {
@@ -35,7 +36,7 @@ class JsonFileHandler
 
     private function validateFile(string $filename): array
     {
-        $this->checkFileExistence($filename);
+        $filename = FileValidator::validateFileName($filename);
         $jsonContents = $this->getFileContents($filename);
         $contents = $this->parseJson($jsonContents);
         if (!$contents) {
@@ -45,17 +46,6 @@ class JsonFileHandler
         return $contents;
     }
 
-    /**
-     * @param string $filename
-     * @return void
-     * @throws FileHandlerException
-     */
-    private function checkFileExistence(string $filename): void
-    {
-        if (!file_exists($filename)) {
-            throw new FileHandlerException('File not found');
-        }
-    }
 
     /**
      * @param string $filename
