@@ -13,7 +13,7 @@ class BaseTest extends TestCase
      */
     protected static array|null $files = [];
 
-    private static ContainerBuilder|null $containerBuilder;
+    protected static ContainerBuilder|null $containerBuilder;
 
     public static function setUpBeforeClass(): void
     {

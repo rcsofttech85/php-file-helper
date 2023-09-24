@@ -17,10 +17,10 @@ trait FileValidatorTrait
     {
         $container = (new ServiceContainer())->getContainerBuilder();
 
-        $stored_hash_file = $container->getParameter('FILE_NAME');
+        $stored_hash_file = $container->getParameter('STORED_HASH_FILE');
 
         if ($filename != $stored_hash_file) {
-            self::sanitize($filename);
+            $this->sanitize($filename);
         }
 
 
