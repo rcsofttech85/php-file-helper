@@ -4,8 +4,9 @@ namespace unit;
 
 use Base\BaseTest;
 use PHPUnit\Framework\Attributes\Test;
+use Rcsofttech85\FileHandler\Exception\FileHandlerException;
+use Rcsofttech85\FileHandler\Exception\HashException;
 use Rcsofttech85\FileHandler\FileHashChecker;
-use Symfony\Component\Dotenv\Dotenv;
 
 class FileHashCheckerTest extends BaseTest
 {
@@ -29,10 +30,11 @@ class FileHashCheckerTest extends BaseTest
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
-        $dotenv = new Dotenv();
-        $dotenv->load('.env');
 
-        self::$file = $_ENV['FILE_NAME'];
+        $file = self::$containerBuilder->getParameter('STORED_HASH_FILE');
+        if (is_string($file)) {
+            self::$file = $file;
+        }
         static::$files = ['movie.csv', 'sample'];
     }
 
@@ -41,6 +43,10 @@ class FileHashCheckerTest extends BaseTest
         parent::tearDownAfterClass();
     }
 
+
+    /**
+     * @throws HashException
+     */
     #[Test]
     public function shouldGenerateValidHashForDifferentAlgo(): void
     {
@@ -58,6 +64,10 @@ class FileHashCheckerTest extends BaseTest
         $this->assertEquals($expectedHash, $actualHash);
     }
 
+    /**
+     * @throws HashException
+     * @throws FileHandlerException
+     */
     #[Test]
     public function checkFileIntegrityReturnsTrueIfHashMatch(): void
     {
@@ -66,6 +76,10 @@ class FileHashCheckerTest extends BaseTest
         $this->assertTrue($isVerified);
     }
 
+    /**
+     * @throws HashException
+     * @throws FileHandlerException
+     */
     #[Test]
     public function shouldReturnFalseIfFileIsModified(): void
     {
@@ -79,6 +93,10 @@ class FileHashCheckerTest extends BaseTest
         file_put_contents("movie.csv", $backup);
     }
 
+    /**
+     * @throws HashException
+     * @throws FileHandlerException
+     */
     #[Test]
     public function shouldReturnFalseIfDifferentAlgoIsUsedForVerifyHash(): void
     {
