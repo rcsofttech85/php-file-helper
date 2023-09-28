@@ -13,16 +13,6 @@ class CsvFileHandlerTest extends BaseTest
 {
     private CsvFileHandler|null $csvFileHandler;
 
-    public static function setUpBeforeClass(): void
-    {
-        parent::setUpBeforeClass();
-        static::$files = ['movie.csv'];
-    }
-
-    public static function tearDownAfterClass(): void
-    {
-        parent::tearDownAfterClass();
-    }
 
     protected function setUp(): void
     {

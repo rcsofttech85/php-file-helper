@@ -7,6 +7,9 @@ use Rcsofttech85\FileHandler\Exception\FileHandlerException;
 
 trait FileValidatorTrait
 {
+    public const STORED_HASH_FILE = 'STORED_HASH_FILE';
+
+
     /**
      * @param string $filename
      * @param string|null $path
@@ -15,11 +18,7 @@ trait FileValidatorTrait
      */
     public function validateFileName(string $filename, string|null $path = null): string
     {
-        $container = (new ServiceContainer())->getContainerBuilder();
-
-        $stored_hash_file = $container->getParameter('STORED_HASH_FILE');
-
-        if ($filename != $stored_hash_file) {
+        if (!$this->isFileSafe($filename, self::STORED_HASH_FILE)) {
             $this->sanitize($filename);
         }
 
@@ -49,5 +48,47 @@ trait FileValidatorTrait
         }
 
         return $filename;
+    }
+
+    /**
+     * @throws FileHandlerException
+     */
+    private function isFileSafe(string $filename, string $envVariable): bool
+    {
+        $safeFile = $this->getParameter($envVariable);
+
+        if ($safeFile !== $filename) {
+            return false;
+        }
+        if (!file_exists($safeFile)) {
+            throw new FileHandlerException('env variable does not contain a valid file path');
+        }
+
+
+        return true;
+    }
+
+    /**
+     * @throws FileHandlerException
+     */
+    public function isFileRestricted(string $filename, string $envVariable): bool
+    {
+        return $this->isFileSafe($filename, $envVariable);
+    }
+
+    /**
+     * @throws FileHandlerException
+     */
+    private function getParameter(string $param): string
+    {
+        $container = (new ServiceContainer())->getContainerBuilder();
+
+        $parameter = $container->getParameter($param);
+
+        if (!is_string($parameter)) {
+            throw new FileHandlerException("{$param} is expected to be string");
+        }
+
+        return $parameter;
     }
 }

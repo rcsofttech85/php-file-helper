@@ -35,12 +35,7 @@ class FileHashCheckerTest extends BaseTest
         if (is_string($file)) {
             self::$file = $file;
         }
-        static::$files = ['movie.csv', 'sample'];
-    }
-
-    public static function tearDownAfterClass(): void
-    {
-        parent::tearDownAfterClass();
+        static::$files[] = 'sample';
     }
 
 

@@ -24,17 +24,6 @@ class FileEncryptorTest extends BaseTest
         $this->fileEncryptor = null;
     }
 
-    public static function setUpBeforeClass(): void
-    {
-        parent::setUpBeforeClass();
-        static::$files = ['movie.csv'];
-    }
-
-    public static function tearDownAfterClass(): void
-    {
-        parent::tearDownAfterClass();
-    }
-
 
     #[Test]
     public function throwExceptionOnDecryptingNonEncryptedFile(): void
