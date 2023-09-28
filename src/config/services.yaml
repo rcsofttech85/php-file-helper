@@ -1,7 +1,7 @@
 parameters:
   filename: 'movie.csv'
   secret: 'password'
-  hash_file_name: 'test'
+
 
 
 
@@ -22,7 +22,7 @@ services:
 
   file_hash:
     class: 'Rcsofttech85\FileHandler\FileHashChecker'
-    arguments: [ '%filename%','@csv_file_handler' ]
+    arguments: [ '@csv_file_handler' ]
 
   json_file_handler:
     class: 'Rcsofttech85\FileHandler\JsonFileHandler'
