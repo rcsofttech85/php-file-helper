@@ -24,7 +24,7 @@ class BaseTest extends TestCase
             . "Zack and Miri Make a Porno,Romance,The Weinstein Company,70,1.747541667,64,$41.94 ,2008\n"
             . "Youth in Revolt,Comedy,The Weinstein Company,52,1.09,68,$19.62 ,2010\n"
             . "Twilight,Romance,Independent,68,6.383363636,26,$702.17 ,2011";
-
+        self::$files[] = 'movie.csv';
         file_put_contents('movie.csv', $content);
     }
 

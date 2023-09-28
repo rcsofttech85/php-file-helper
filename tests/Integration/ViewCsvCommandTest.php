@@ -2,14 +2,22 @@
 
 namespace Integration;
 
+use Base\BaseTest;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 
 #[Group("integration")]
-class ViewCsvCommandTest extends TestCase
+class ViewCsvCommandTest extends BaseTest
 {
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+
+        self::$files[] = 'profile.csv';
+        self::$files[] = 'invalidProfile.csv';
+    }
+
     /**
      * @return iterable<array<string>>
      */
@@ -53,7 +61,7 @@ class ViewCsvCommandTest extends TestCase
     #[DataProvider('fileProvider')]
     public function viewCsvFileDisplayInformationCorrectly(string $file): void
     {
-        $command = "php bin/view-csv {$file}";
+        $command = "bin/view-csv {$file}";
         exec($command, $output, $exitCode);
         $actualOutput = implode("\n", $output);
 
@@ -63,26 +71,42 @@ class ViewCsvCommandTest extends TestCase
     }
 
     #[Test]
-    public function ifLimitIsSetToNonNumericCommandShouldFail(): void
+    public function ifLimitIsSetToNonNumericThenCommandShouldFail(): void
     {
-        $command = "php bin/view-csv movie.csv --limit hello";
+        $limit = 'hello';
+        $command = "bin/view-csv movie.csv --limit {$limit}";
         exec($command, $output, $exitCode);
         $actualOutput = implode("\n", $output);
 
         $this->assertSame(1, $exitCode);
-        $this->assertStringContainsString("hello is not numeric", $actualOutput);
+        $this->assertStringContainsString("{$limit} is not numeric", $actualOutput);
     }
 
     #[Test]
     #[DataProvider('InvalidFileProvider')]
     public function commandShouldReturnErrorIfFileIsInvalid(string $file): void
     {
-        $command = "php bin/view-csv {$file}";
+        $command = "bin/view-csv {$file}";
         exec($command, $output, $exitCode);
         $actualOutput = implode("\n", $output);
 
         $this->assertStringContainsString('invalid csv file', $actualOutput);
         $this->assertSame(1, $exitCode);
         unlink($file);
+    }
+
+    #[Test]
+    public function viewBlockedForRestrictedFile(): void
+    {
+        $restrictedFile = self::$containerBuilder->getParameter('STORED_HASH_FILE');
+        if (!is_string($restrictedFile)) {
+            $this->fail('restricted files is expected to be string');
+        }
+        $command = "bin/view-csv {$restrictedFile}";
+        exec($command, $output, $exitCode);
+        $actualOutput = implode("\n", $output);
+
+        $this->assertStringContainsString("{$restrictedFile} does not exists", $actualOutput);
+        $this->assertSame(1, $exitCode);
     }
 }

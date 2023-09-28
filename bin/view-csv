@@ -26,16 +26,24 @@ $command = (new SingleCommandApplication())
         $limit = $input->getOption('limit');
 
         try {
-            $csvFile = (new class {
+            $filValidator = (new class {
                 use FileValidatorTrait;
-            })->validateFileName($csvFile);
+            });
+            if ($filValidator->isFileRestricted($csvFile, 'STORED_HASH_FILE')) {
+                throw new FileHandlerException();
+            }
+            $csvFile = $filValidator->validateFileName($csvFile);
         } catch (FileHandlerException) {
-            $io->error("{$csvFile} does not exists");
+            $io->error(
+                "{$csvFile} does not exists"
+            );
             return Command::FAILURE;
         }
 
         if (isset($limit) && !is_numeric($limit)) {
-            $io->error("{$limit} is not numeric");
+            $io->error(
+                "{$limit} is not numeric"
+            );
             return Command::FAILURE;
         }
 
