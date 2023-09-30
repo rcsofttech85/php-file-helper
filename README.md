@@ -226,6 +226,10 @@ vendor/bin/view-json movies.json --hide-column Film --limit 5
 
 ```
 
+## Applying filters to a csv file
+
+![Csv File](images/csv-view.jpeg)
+
 
 
 
