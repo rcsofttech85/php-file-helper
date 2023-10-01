@@ -36,11 +36,24 @@ class TempFileHandler
 
     /**
      * @param array<string> $headers
-     * @return string
+     * @param string|null $dirName
+     * @param string|null $prefix
+     * @return string|false
      */
-    public function createTempFileWithHeaders(array $headers): string|false
-    {
-        $tempFilePath = tempnam(sys_get_temp_dir(), 'tempfile_');
+    public function createTempFileWithHeaders(
+        array $headers,
+        string|null $dirName = null,
+        string|null $prefix = null
+    ): string|false {
+        if (null === $dirName) {
+            $dirName = sys_get_temp_dir();
+        }
+        if (null === $prefix) {
+            $prefix = 'tempfile_';
+        }
+
+        $tempFilePath = $this->getTempName($dirName, $prefix);
+
         if (!$tempFilePath) {
             return false;
         }
@@ -52,5 +65,13 @@ class TempFileHandler
 
 
         return $tempFilePath;
+    }
+
+    public function getTempName(string $directory, string $prefix): string|false
+    {
+        if (!is_dir($directory)) {
+            return false;
+        }
+        return tempnam($directory, $prefix);
     }
 }
