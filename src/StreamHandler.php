@@ -49,8 +49,6 @@ class StreamHandler
 
                     Fiber::suspend();
                 }
-            } catch (Throwable $e) {
-                throw new StreamException();
             } finally {
                 fclose($stream);
                 fclose($outputFile);
@@ -58,8 +56,6 @@ class StreamHandler
         });
     }
 
-    /**
-     */
     public function initiateConcurrentStreams(): self
     {
         foreach ($this->streamUrls as $outputFile => $streamUrl) {
@@ -72,6 +68,7 @@ class StreamHandler
     }
 
     /**
+     * @return $this
      * @throws StreamException
      * @throws Throwable
      */
@@ -81,7 +78,6 @@ class StreamHandler
             throw new StreamException("No fibers available to start");
         }
 
-        /** @var Fiber $fiber */
         foreach ($this->fibers as $fiber) {
             $fiber->start();
         }
@@ -98,7 +94,6 @@ class StreamHandler
             throw new StreamException("No fibers are currently running");
         }
 
-        /** @var Fiber $fiber */
         foreach ($this->fibers as $fiber) {
             while (!$fiber->isTerminated()) {
                 $fiber->resume();
@@ -108,6 +103,11 @@ class StreamHandler
             }
         }
 
+        $this->fibers = [];
+    }
+
+    public function resetFibers(): void
+    {
         $this->fibers = [];
     }
 }
