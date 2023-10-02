@@ -111,4 +111,17 @@ class FileHashCheckerTest extends BaseTest
 
         $this->assertTrue($isVerified);
     }
+
+    /**
+     * @return void
+     * @throws FileHandlerException
+     * @throws HashException
+     */
+    #[Test]
+    public function shouldThrowExceptionIfInvalidAlgoProvided(): void
+    {
+        $this->expectException(HashException::class);
+        $this->expectExceptionMessage('algorithm not supported');
+        $this->fileHash->hashFile('sample', 'invalid');
+    }
 }

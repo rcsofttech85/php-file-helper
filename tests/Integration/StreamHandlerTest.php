@@ -13,6 +13,8 @@ use Throwable;
 #[Group("integration")]
 class StreamHandlerTest extends BaseTest
 {
+    private StreamHandler|null $streamHandler = null;
+
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
@@ -22,6 +24,36 @@ class StreamHandlerTest extends BaseTest
     public static function tearDownAfterClass(): void
     {
         parent::tearDownAfterClass();
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $this->streamHandler = null;
+    }
+
+    /**
+     * @return void
+     * @throws StreamException
+     * @throws Throwable
+     */
+    #[Test]
+    public function resumeAtOnceWorkingProperly(): void
+    {
+        $data = "<html><body>hello world</body></html>";
+        file_put_contents("profile", $data);
+        $this->streamHandler = new StreamHandler([
+            "output.html" => "profile"
+
+        ]);
+
+        $this->streamHandler->initiateConcurrentStreams()->start()->resume(resumeOnce: true);
+        $content = file_get_contents('output.html');
+        if (!$content) {
+            $this->fail('file has no content');
+        }
+
+        $this->assertStringContainsString($data, $content);
     }
 
     /**
@@ -34,8 +66,8 @@ class StreamHandlerTest extends BaseTest
     #[DataProvider('streamDataProvider')]
     public function streamAndWriteToFile(array $urls): void
     {
-        $stream = new StreamHandler($urls);
-        $stream->initiateConcurrentStreams()->start()->resume();
+        $this->streamHandler = new StreamHandler($urls);
+        $this->streamHandler->initiateConcurrentStreams()->start()->resume();
 
         $files = array_keys($urls);
         foreach ($files as $file) {
@@ -46,24 +78,77 @@ class StreamHandlerTest extends BaseTest
         }
     }
 
+    /**
+     * @param string $outputFile
+     * @param string $url
+     * @return void
+     * @throws StreamException
+     * @throws Throwable
+     */
 
     #[Test]
     #[DataProvider('wrongStreamDataProvider')]
     public function throwExceptionIfUrlIsInvalid(string $outputFile, string $url): void
     {
-        $stream = new StreamHandler([$outputFile => $url]);
+        $this->streamHandler = new StreamHandler([$outputFile => $url]);
 
 
         $this->expectException(StreamException::class);
-        $stream->initiateConcurrentStreams()->start()->resume();
+        $this->streamHandler->initiateConcurrentStreams()->start()->resume();
     }
 
+    /**
+     * @return void
+     * @throws StreamException
+     * @throws Throwable
+     */
+
+    #[Test]
+    public function throwExceptionIfNoFibersAreAvailable(): void
+    {
+        $this->streamHandler = new StreamHandler([
+            "output.html" =>
+                "https://gist.github.com/rcsofttech85/629b37d483c4796db7bdcb3704067631#file-gistfile1-txt",
+
+        ]);
+
+        $this->expectException(StreamException::class);
+        $this->expectExceptionMessage('No fibers available to start');
+        $this->streamHandler->resetFibers();
+        $this->streamHandler->start();
+    }
+
+
+    /**
+     * @return void
+     * @throws StreamException
+     * @throws Throwable
+     */
+    #[Test]
+    public function throwExceptionIfNoFibersAreAvailableToResume(): void
+    {
+        $this->streamHandler = new StreamHandler([
+            "output.html" =>
+                "https://gist.github.com/rcsofttech85/629b37d483c4796db7bdcb3704067631#file-gistfile1-txt",
+
+        ]);
+
+        $this->expectException(StreamException::class);
+        $this->expectExceptionMessage('No fibers are currently running');
+        $this->streamHandler->resetFibers();
+        $this->streamHandler->resume();
+    }
+
+    /**
+     * @return void
+     * @throws StreamException
+     */
     #[Test]
     public function throwExceptionIfEmptyDataProvided(): void
     {
         $this->expectException(StreamException::class);
         $this->expectExceptionMessage('No stream URLs provided.');
-        new StreamHandler([]);
+        $this->streamHandler = new StreamHandler([]);
     }
 
     /**

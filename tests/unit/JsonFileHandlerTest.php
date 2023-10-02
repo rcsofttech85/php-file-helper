@@ -16,6 +16,8 @@ class JsonFileHandlerTest extends BaseTest
     {
         parent::setUpBeforeClass();
         static::$files[] = 'book.json';
+        static::$files[] = 'sample';
+
 
         $content = '[
             {
@@ -84,6 +86,80 @@ class JsonFileHandlerTest extends BaseTest
         $this->assertSame(3, count($data));
         $this->assertEquals($data, $book);
     }
+
+    #[Test]
+    public function throwExceptionIfFileIsNotFound(): void
+    {
+        $this->expectException(FileHandlerException::class);
+        $this->expectExceptionMessage('abc is not valid');
+        $this->jsonFileHandler->getValidJsonData('abc');
+    }
+
+    #[Test]
+    public function throwExceptionIfFileIsDoesNotContainValidJson(): void
+    {
+        file_put_contents("sample", "hello");
+        $this->expectException(FileHandlerException::class);
+        $this->expectExceptionMessage('could not decode json');
+        $this->jsonFileHandler->getValidJsonData('sample');
+        unlink('sample');
+    }
+
+    #[Test]
+    public function throwExceptionIfJsonIsNotAList(): void
+    {
+        $content = '[
+            {
+                "title": "The Catcher in the Rye",
+                "author": "J.D. Salinger",
+                "published_year": 1951
+            },
+            {
+                "title": "To Kill a Mockingbird",
+                "author": "Harper Lee",
+                "published_year": 1960
+            },
+            {
+                "titles": "1984",
+                "authors": "George Orwell",
+                "published_year": 1949
+            }
+        ]';
+        file_put_contents("sample", $content);
+        $this->expectException(FileHandlerException::class);
+        $this->expectExceptionMessage('Inconsistent JSON data');
+        $this->jsonFileHandler->getValidJsonData('sample');
+    }
+
+    #[Test]
+    public function setLimitWorkingProperly(): void
+    {
+        $headers = [];
+        $data = $this->jsonFileHandler->getRows(filename: 'book.json', headers: $headers, limit: 2);
+
+        $data = iterator_to_array($data);
+
+        $this->assertSame(2, count($data));
+    }
+
+    #[Test]
+    public function setHideColumnWorkingProperly(): void
+    {
+        $headers = [];
+        $this->jsonFileHandler->getRows(
+            filename: 'book.json',
+            headers: $headers,
+            hideColumns: ['title'],
+            limit: 1
+        );
+
+        if (in_array('title', $headers)) {
+            $this->fail('hide column is not working properly');
+        }
+
+        $this->assertTrue(true);
+    }
+
 
     protected function setUp(): void
     {

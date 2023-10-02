@@ -4,12 +4,17 @@ namespace unit;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Rcsofttech85\FileHandler\Exception\FileHandlerException;
 use Rcsofttech85\FileHandler\TempFileHandler;
 
 class TempFileHandlerTest extends TestCase
 {
     private TempFileHandler|null $tempFileHandler = null;
 
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
     #[Test]
     public function renameTempFile(): void
     {
@@ -58,10 +63,18 @@ class TempFileHandlerTest extends TestCase
     }
 
     #[Test]
+    public function getTempNameReturnFalseOnWrongValue(): void
+    {
+        $isTempFileValid = $this->tempFileHandler->createTempFileWithHeaders([], 'abcd', 'abcd');
+
+        $this->assertFalse($isTempFileValid);
+    }
+
+
+    #[Test]
     public function createTempFileWithHeaders(): void
     {
         $headers = ['header1', 'header2', 'header3'];
-
 
         $tempFilePath = $this->tempFileHandler->createTempFileWithHeaders($headers);
         if (!$tempFilePath) {
@@ -75,6 +88,20 @@ class TempFileHandlerTest extends TestCase
 
         unlink($tempFilePath);
     }
+
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
+    #[Test]
+    public function throwsExceptionIfRenameFails(): void
+    {
+        $this->expectException(FileHandlerException::class);
+        $this->expectExceptionMessage('Failed to rename temp file');
+
+        $this->tempFileHandler->renameTempFile('', '');
+    }
+
 
     protected function setUp(): void
     {
