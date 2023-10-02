@@ -40,15 +40,20 @@ class StreamHandlerTest extends BaseTest
     #[Test]
     public function resumeAtOnceWorkingProperly(): void
     {
+        $data = "<html><body>hello world</body></html>";
+        file_put_contents("profile", $data);
         $this->streamHandler = new StreamHandler([
-            "output.html" =>
-                "https://gist.github.com/rcsofttech85/629b37d483c4796db7bdcb3704067631#file-gistfile1-txt",
+            "output.html" => "profile"
 
         ]);
 
         $this->streamHandler->initiateConcurrentStreams()->start()->resume(resumeOnce: true);
+        $content = file_get_contents('output.html');
+        if (!$content) {
+            $this->fail('file has no content');
+        }
 
-        $this->assertStringNotContainsString("</html>", file_get_contents('output.html'));
+        $this->assertStringContainsString($data, $content);
     }
 
     /**
