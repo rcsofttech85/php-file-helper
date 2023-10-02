@@ -146,7 +146,7 @@ class JsonFileHandlerTest extends BaseTest
     public function setHideColumnWorkingProperly(): void
     {
         $headers = [];
-        $data = $this->jsonFileHandler->getRows(
+        $this->jsonFileHandler->getRows(
             filename: 'book.json',
             headers: $headers,
             hideColumns: ['title'],
