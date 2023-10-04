@@ -73,7 +73,7 @@ class CsvFileHandlerTest extends BaseTest
     #[Test]
     public function shouldReturnFalseIfKeywordIsNotMatched(): void
     {
-        $result = $this->csvFileHandler->findAndReplaceInCsv("movie.csv", "Twil", "hello");
+        $this->csvFileHandler->findAndReplaceInCsv("movie.csv", "Twil", "hello");
         $this->assertFalse(false);
     }
 
