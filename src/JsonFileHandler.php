@@ -86,8 +86,7 @@ class JsonFileHandler
         array &$headers,
         array|false $hideColumns = false,
         int|false $limit = false
-    ): Generator
-    {
+    ): Generator {
         $contents = $this->validateFile($filename);
 
         $headers = array_keys($contents[0]);

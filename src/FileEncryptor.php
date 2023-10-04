@@ -54,10 +54,7 @@ readonly class FileEncryptor
 
         $output = bin2hex($nonce . $ciphertext);
 
-        $file = fopen($this->filename, 'w');
-        if (!$file) {
-            return false;
-        }
+        $file = $this->openFileAndReturnResource($this->filename);
 
         try {
             fwrite($file, $output);
@@ -69,10 +66,10 @@ readonly class FileEncryptor
     }
 
     /**
-     *
+     * @return bool
      * @throws FileEncryptorException
+     * @throws FileHandlerException
      * @throws SodiumException
-     *
      */
     public function decryptFile(): bool
     {
@@ -86,10 +83,8 @@ readonly class FileEncryptor
             throw new FileEncryptorException('file is not encrypted');
         }
 
-        $bytes = hex2bin($encryptedData);
-        if (!$bytes) {
-            return false;
-        }
+        $bytes = $this->convertHexToBin($encryptedData);
+
         $nonce = substr($bytes, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
         $ciphertext = substr($bytes, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
 
@@ -102,10 +97,7 @@ readonly class FileEncryptor
         }
 
 
-        $file = fopen($this->filename, 'w');
-        if (!$file) {
-            return false;
-        }
+        $file = $this->openFileAndReturnResource($this->filename);
 
         try {
             fwrite($file, $plaintext);
@@ -114,5 +106,19 @@ readonly class FileEncryptor
         }
 
         return true;
+    }
+
+    /**
+     * @param string $encryptedData
+     * @return string
+     * @throws FileEncryptorException
+     */
+    public function convertHexToBin(string $encryptedData): string
+    {
+        $bytes = hex2bin($encryptedData);
+        if (!$bytes) {
+            throw new FileEncryptorException('could not convert hex to bin');
+        }
+        return $bytes;
     }
 }

@@ -19,7 +19,10 @@ class ServiceContainer
         $loader = new YamlFileLoader($containerBuilder, new FileLocator(__DIR__ . '/../../src/config'));
         $loader->load('services.yaml');
 
-        $containerBuilder->setParameter('STORED_HASH_FILE', $_ENV['STORED_HASH_FILE']);
+        foreach ($_ENV as $key => $value) {
+            $containerBuilder->setParameter($key, $value);
+        }
+
 
         return $containerBuilder;
     }

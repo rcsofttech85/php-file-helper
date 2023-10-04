@@ -6,6 +6,7 @@ use Base\BaseTest;
 use PHPUnit\Framework\Attributes\Test;
 use Rcsofttech85\FileHandler\Exception\FileEncryptorException;
 use Rcsofttech85\FileHandler\FileEncryptor;
+use SodiumException;
 
 class FileEncryptorTest extends BaseTest
 {
@@ -22,9 +23,14 @@ class FileEncryptorTest extends BaseTest
     {
         parent::tearDown();
         $this->fileEncryptor = null;
+        unlink('test');
     }
 
-
+    /**
+     * @return void
+     * @throws FileEncryptorException
+     * @throws SodiumException
+     */
     #[Test]
     public function throwExceptionOnDecryptingNonEncryptedFile(): void
     {
@@ -33,6 +39,10 @@ class FileEncryptorTest extends BaseTest
         $this->fileEncryptor->decryptFile();
     }
 
+    /**
+     * @return void
+     * @throws FileEncryptorException
+     */
     #[Test]
     public function canEncryptFile(): void
     {
@@ -41,6 +51,10 @@ class FileEncryptorTest extends BaseTest
         $this->assertTrue($isFileEncrypted);
     }
 
+    /**
+     * @return void
+     * @throws FileEncryptorException
+     */
     #[Test]
     public function throwExceptionIfAlreadyEncrypted(): void
     {
@@ -48,6 +62,49 @@ class FileEncryptorTest extends BaseTest
         $this->expectExceptionMessage('file is already encrypted');
         $this->fileEncryptor->encryptFile();
     }
+
+    /**
+     * @return void
+     * @throws FileEncryptorException
+     */
+    #[Test]
+    public function throwExceptionIfFileHasNoContentWhileEncrypt(): void
+    {
+        file_put_contents("test", "");
+        $file = new FileEncryptor('test', 'pass');
+        $this->expectException(FileEncryptorException::class);
+        $this->expectExceptionMessage('File has no content');
+        $file->encryptFile();
+    }
+
+    #[Test]
+    public function throwExceptionIfCouldNotConvertHexToBin(): void
+    {
+        $this->expectException(FileEncryptorException::class);
+        $this->expectExceptionMessage('could not convert hex to bin');
+        $this->fileEncryptor->convertHexToBin('hello');
+    }
+
+    /**
+     * @return void
+     * @throws FileEncryptorException
+     * @throws SodiumException
+     */
+    #[Test]
+    public function throwExceptionIfFileHasNoContent(): void
+    {
+        file_put_contents("test", "");
+        $file = new FileEncryptor('test', 'pass');
+        $this->expectException(FileEncryptorException::class);
+        $this->expectExceptionMessage('File has no content');
+        $file->decryptFile();
+    }
+
+    /**
+     * @return void
+     * @throws FileEncryptorException
+     * @throws SodiumException
+     */
 
     #[Test]
     public function throwExceptionIfDecryptionFails(): void
@@ -59,6 +116,11 @@ class FileEncryptorTest extends BaseTest
         $fileEncryptor->decryptFile();
     }
 
+    /**
+     * @return void
+     * @throws FileEncryptorException
+     * @throws SodiumException
+     */
     #[Test]
     public function canDecryptFile(): void
     {

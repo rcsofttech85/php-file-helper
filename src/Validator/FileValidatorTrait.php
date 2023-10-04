@@ -4,6 +4,7 @@ namespace Rcsofttech85\FileHandler\Validator;
 
 use Rcsofttech85\FileHandler\DependencyInjection\ServiceContainer;
 use Rcsofttech85\FileHandler\Exception\FileHandlerException;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 trait FileValidatorTrait
 {
@@ -30,10 +31,6 @@ trait FileValidatorTrait
             $filename = $absolutePath . DIRECTORY_SEPARATOR . $filename;
         }
 
-
-        if (!file_exists($filename)) {
-            throw new FileHandlerException('file not found');
-        }
         return $filename;
     }
 
@@ -51,25 +48,27 @@ trait FileValidatorTrait
     }
 
     /**
+     * @param string $filename
+     * @param string $envVariable
+     * @return bool
      * @throws FileHandlerException
      */
     private function isFileSafe(string $filename, string $envVariable): bool
     {
         $safeFile = $this->getParameter($envVariable);
 
+
         if ($safeFile !== $filename) {
             return false;
         }
-        if (!file_exists($safeFile)) {
-            throw new FileHandlerException('env variable does not contain a valid file path');
-        }
-
 
         return true;
     }
 
     /**
-     * @throws FileHandlerException
+     * @param string $filename
+     * @param string $envVariable
+     * @return bool
      */
     public function isFileRestricted(string $filename, string $envVariable): bool
     {
@@ -77,18 +76,44 @@ trait FileValidatorTrait
     }
 
     /**
+     * @param string $param
+     * @return string
      * @throws FileHandlerException
      */
     private function getParameter(string $param): string
     {
         $container = (new ServiceContainer())->getContainerBuilder();
+        return $this->getParam($container, $param);
+    }
 
-        $parameter = $container->getParameter($param);
-
-        if (!is_string($parameter)) {
-            throw new FileHandlerException("{$param} is expected to be string");
+    /**
+     * @param ContainerBuilder $container
+     * @param string $parameter
+     * @return string
+     * @throws FileHandlerException
+     */
+    public function getParam(ContainerBuilder $container, string $parameter): string
+    {
+        $param = $container->getParameter($parameter);
+        if (!is_string($param)) {
+            throw new FileHandlerException("{$parameter} is not string type");
         }
 
-        return $parameter;
+        return $param;
+    }
+
+    /**
+     * @param string $filename
+     * @param string $mode
+     * @return mixed
+     * @throws FileHandlerException
+     */
+    public function openFileAndReturnResource(string $filename, string $mode = 'w'): mixed
+    {
+        $file = fopen($filename, $mode);
+        if (!$file) {
+            throw new FileHandlerException('file is not valid');
+        }
+        return $file;
     }
 }

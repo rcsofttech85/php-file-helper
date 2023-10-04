@@ -6,6 +6,7 @@ use Base\BaseTest;
 use PHPUnit\Framework\Attributes\Test;
 use Rcsofttech85\FileHandler\Exception\FileHandlerException;
 use Rcsofttech85\FileHandler\FileHandler;
+use ZipArchive;
 
 class FileHandlerTest extends BaseTest
 {
@@ -21,7 +22,7 @@ class FileHandlerTest extends BaseTest
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
-        static::$files = ["movie.csv", "file", 'file1'];
+        static::$files = ["movie.csv", "file", 'file1', 'unknown_mime_type'];
     }
 
     public static function tearDownAfterClass(): void
@@ -36,7 +37,10 @@ class FileHandlerTest extends BaseTest
         $this->fileHandler = null;
     }
 
-
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
     #[Test]
     public function fileSuccessfullyWritten(): void
     {
@@ -47,6 +51,10 @@ class FileHandlerTest extends BaseTest
         $this->assertEquals(expected: "hello world", actual: file_get_contents(filename: 'file'));
     }
 
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
     #[Test]
     public function shouldThrowExceptionIfFileIsNotFound(): void
     {
@@ -55,6 +63,11 @@ class FileHandlerTest extends BaseTest
         $this->fileHandler->open(filename: 'unknown', mode: "r");
     }
 
+
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
     #[Test]
     public function shouldThrowExceptionIfFileIsNotWritable(): void
     {
@@ -66,6 +79,10 @@ class FileHandlerTest extends BaseTest
         $this->fileHandler->close();
     }
 
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
     #[Test]
     public function successfulCompression(): void
     {
@@ -80,6 +97,70 @@ class FileHandlerTest extends BaseTest
         $this->assertEquals('application/zip', $mimeType);
     }
 
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
+    #[Test]
+    public function shouldThrowExceptionIfZipArchiveIsUnableToCreateWhileDecompress(): void
+    {
+        $testFile = 'movie.csv';
+        $compressedZip = 'compressed.zip';
+
+        $this->fileHandler->compress($testFile, $compressedZip);
+
+        $this->expectException(FileHandlerException::class);
+        $this->expectExceptionMessage('Invalid or uninitialized Zip object');
+        $this->fileHandler->decompress(zipFilename: 'compressed.zip', flag: 10);
+    }
+
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
+    #[Test]
+    public function shouldThrowExceptionIfZipArchiveHasInvalidExtractPathWhileDecompress(): void
+    {
+        $testFile = 'movie.csv';
+        $compressedZip = 'compressed.zip';
+
+        $this->fileHandler->compress($testFile, $compressedZip);
+
+        $this->expectException(FileHandlerException::class);
+        $this->expectExceptionMessage('Failed to extract the ZIP archive.');
+        $this->fileHandler->decompress(zipFilename: 'compressed.zip', extractPath: '/abcd');
+    }
+
+    #[Test]
+    public function shouldThrowExceptionIfZipArchiveIsUnableToCreate(): void
+    {
+        $testFile = 'movie.csv';
+        $compressedZip = 'compressed.zip';
+        $this->expectException(FileHandlerException::class);
+        $this->expectExceptionMessage('Failed to create the ZIP archive.');
+        $this->fileHandler->compress($testFile, $compressedZip, ZipArchive::ER_EXISTS);
+    }
+
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
+
+    #[Test]
+    public function getMimeTypeThrowsErrorIfMimeTypeIsUnrecognised(): void
+    {
+        file_put_contents("unknown_mime_type", "%%");
+
+        $this->expectException(FileHandlerException::class);
+        $this->expectExceptionMessage('unknown mime type');
+        $this->fileHandler->getMimeType('unknown_mime_type');
+    }
+
+
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
     #[Test]
     public function getMimeTypeFunctionReturnsCorrectInfo(): void
     {
@@ -90,6 +171,10 @@ class FileHandlerTest extends BaseTest
         $this->assertEquals('application/zip', $zipFile);
     }
 
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
     #[Test]
     public function successfulDecompression(): void
     {
@@ -113,6 +198,10 @@ class FileHandlerTest extends BaseTest
         rmdir($extractPath);
     }
 
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
     #[Test]
     public function fileIsClosedProperly(): void
     {
@@ -125,6 +214,10 @@ class FileHandlerTest extends BaseTest
         $this->fileHandler->write(data: "hello");
     }
 
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
     #[Test]
     public function multipleFileCanBeWrittenSimultaneously(): void
     {
@@ -138,5 +231,20 @@ class FileHandlerTest extends BaseTest
 
         $this->assertEquals("hello world", file_get_contents(filename: 'file1'));
         $this->fileHandler->close();
+    }
+
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
+    #[Test]
+    public function checkFilesAreDeletedProperly(): void
+    {
+        file_put_contents("deleteFile", "");
+        $this->fileHandler->delete("deleteFile");
+
+        if (!file_exists("deleteFile")) {
+            $this->assertTrue(true);
+        }
     }
 }

@@ -131,6 +131,10 @@ class JsonFileHandlerTest extends BaseTest
         $this->jsonFileHandler->getValidJsonData('sample');
     }
 
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
     #[Test]
     public function setLimitWorkingProperly(): void
     {
@@ -142,22 +146,30 @@ class JsonFileHandlerTest extends BaseTest
         $this->assertSame(2, count($data));
     }
 
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
     #[Test]
     public function setHideColumnWorkingProperly(): void
     {
         $headers = [];
-        $this->jsonFileHandler->getRows(
+        $data = $this->jsonFileHandler->getRows(
             filename: 'book.json',
             headers: $headers,
             hideColumns: ['title'],
             limit: 1
         );
+        $data = iterator_to_array($data);
 
         if (in_array('title', $headers)) {
             $this->fail('hide column is not working properly');
         }
 
+        $count = count($data[0]);
+
         $this->assertTrue(true);
+        $this->assertSame(2, $count);
     }
 
 

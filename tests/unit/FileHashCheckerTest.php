@@ -31,6 +31,8 @@ class FileHashCheckerTest extends BaseTest
         parent::setUpBeforeClass();
 
         static::$files[] = 'sample';
+        static::$files[] = 'headers';
+        static::$files[] = 'invalid';
     }
 
 
@@ -82,6 +84,96 @@ class FileHashCheckerTest extends BaseTest
         $this->assertfalse($isVerified);
 
         file_put_contents("movie.csv", $backup);
+    }
+
+    /**
+     * @return void
+     * @throws FileHandlerException
+     * @throws HashException
+     */
+
+    #[Test]
+    public function verifyHashMethodThrowsExceptionIfHashRecordNotFound(): void
+    {
+        $this->expectException(HashException::class);
+        $this->expectExceptionMessage('this file is not hashed');
+        $isVerified = $this->fileHash->verifyHash(filename: 'movie');
+
+        $this->assertTrue($isVerified);
+    }
+
+    /**
+     * @return void
+     * @throws FileHandlerException
+     * @throws HashException
+     */
+    #[Test]
+    public function verifyHashMethodThrowsExceptionIfInvalidFileProvided(): void
+    {
+        file_put_contents("invalid", "");
+        chmod("invalid", 0000);
+        $this->expectException(HashException::class);
+        $this->expectExceptionMessage('could not hash file');
+        $this->fileHash->hashFile(filename: 'invalid');
+    }
+
+    /**
+     * @return void
+     * @throws FileHandlerException
+     * @throws HashException
+     */
+    #[Test]
+    public function hashFileMethodThrowExceptionIfEnvVarIsNotFound(): void
+    {
+        $this->expectException(FileHandlerException::class);
+        $this->expectExceptionMessage('file not found');
+        $this->fileHash->hashFile(filename: 'movie.csv', env: 'INVALID_ENV_VAR');
+    }
+
+
+    /**
+     * @return void
+     * @throws FileHandlerException
+     * @throws HashException
+     */
+    #[Test]
+    public function hashFileMethodThrowExceptionIfInvalidCsvProvided(): void
+    {
+        $storedHashFile = self::$containerBuilder->getParameter('STORED_HASH_FILE');
+
+        if (!is_string($storedHashFile)) {
+            $this->fail('param must be a string type');
+        }
+        $backUpFile = file_get_contents($storedHashFile);
+
+
+        file_put_contents($storedHashFile, "File,Hash");
+        $this->fileHash->hashFile(filename: 'movie.csv');
+
+        $content = file_get_contents($storedHashFile);
+        if (!$content) {
+            $this->fail('file has no content');
+        }
+        $this->assertStringContainsString("movie.csv", $content);
+
+        file_put_contents($storedHashFile, $backUpFile);
+    }
+
+    /**
+     * @return void
+     */
+
+    #[Test]
+    public function checkHeaderExistIfNotShouldCreateOne(): void
+    {
+        file_put_contents("headers", "");
+        $file = fopen("headers", 'w');
+        $this->fileHash->checkHeaderExists($file);
+        $content = file_get_contents("headers");
+        if (!$content) {
+            $this->fail('file has no content');
+        }
+        $this->assertStringContainsString('File,Hash', $content);
     }
 
     /**

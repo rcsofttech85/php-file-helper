@@ -76,7 +76,8 @@ class CsvFileHandler
         string $filename,
         string $keyword,
         string $replace,
-        string|null $column = null
+        string|null $column = null,
+        string|null $dirName = null
     ): bool {
         $headers = $this->extractHeader($filename);
 
@@ -84,11 +85,10 @@ class CsvFileHandler
             throw new FileHandlerException('failed to extract header');
         }
 
-        $tempFilePath = $this->tempFileHandler->createTempFileWithHeaders($headers);
+        $tempFilePath = $this->tempFileHandler->createTempFileWithHeaders($headers, $dirName);
         if (!$tempFilePath) {
-            return false;
+            throw new FileHandlerException('could not create temp file');
         }
-
 
         try {
             $count = 0;
@@ -168,11 +168,7 @@ class CsvFileHandler
     private function getRows(string $filename, array|false $hideColumns = false, int|false $limit = false): Generator
     {
         $filename = $this->validateFileName($filename);
-        $csvFile = fopen($filename, 'r');
-        if (!$csvFile) {
-            throw new FileHandlerException('file not found');
-        }
-
+        $csvFile = $this->openFileAndReturnResource($filename, 'r');
         $headers = $this->extractHeader($csvFile);
         if (!is_array($headers)) {
             fclose($csvFile);

@@ -3,9 +3,18 @@
 namespace Rcsofttech85\FileHandler;
 
 use Rcsofttech85\FileHandler\Exception\FileHandlerException;
+use Rcsofttech85\FileHandler\Validator\FileValidatorTrait;
 
 class TempFileHandler
 {
+    use FileValidatorTrait;
+
+    /**
+     * @param string $tempFilePath
+     * @param string $filename
+     * @return void
+     * @throws FileHandlerException
+     */
     public function renameTempFile(string $tempFilePath, string $filename): void
     {
         if (!rename($tempFilePath, $filename)) {
@@ -39,6 +48,7 @@ class TempFileHandler
      * @param string|null $dirName
      * @param string|null $prefix
      * @return string|false
+     * @throws FileHandlerException
      */
     public function createTempFileWithHeaders(
         array $headers,
@@ -57,11 +67,10 @@ class TempFileHandler
         if (!$tempFilePath) {
             return false;
         }
-        $tempFileHandle = fopen($tempFilePath, 'w');
-        if ($tempFileHandle) {
-            fputs($tempFileHandle, implode(',', $headers) . PHP_EOL);
-            fclose($tempFileHandle);
-        }
+        $tempFileHandle = $this->openFileAndReturnResource($tempFilePath);
+
+        fputs($tempFileHandle, implode(',', $headers) . PHP_EOL);
+        fclose($tempFileHandle);
 
 
         return $tempFilePath;

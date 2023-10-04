@@ -63,34 +63,32 @@ class FileHandler
     /**
      * @throws FileHandlerException
      */
-    public function compress(string $filename, string $zipFilename): void
+    public function compress(string $filename, string $zipFilename, int $flag = ZipArchive::CREATE): void
     {
         $filename = $this->validateFileName($filename);
 
         $zip = new ZipArchive();
 
-        if (!$zip->open($zipFilename, ZipArchive::CREATE)) {
+
+        if (true !== $zip->open($zipFilename, $flag)) {
             throw new FileHandlerException('Failed to create the ZIP archive.');
         }
 
-        if (!$zip->addFile($filename)) {
-            throw new FileHandlerException('Failed to add the file to the ZIP archive.');
-        }
-
-
+        $zip->addFile($filename);
         $zip->close();
     }
 
     /**
      * @throws FileHandlerException
      */
-    public function getMimeType(string $filename): string
+    public function getMimeType(string $filename): string|false
     {
         $filename = $this->validateFileName($filename);
 
+
         $fileInfo = new finfo(FILEINFO_MIME_TYPE);
         $mimeType = $fileInfo->file($filename);
-        if (!$mimeType) {
+        if ($mimeType === 'application/octet-stream') {
             throw new FileHandlerException('unknown mime type');
         }
 
@@ -100,15 +98,16 @@ class FileHandler
     /**
      * @throws FileHandlerException
      */
-    public function decompress(string $zipFilename, string $extractPath = "./"): void
+    public function decompress(string $zipFilename, string $extractPath = "./", int $flag = ZipArchive::CREATE): void
     {
         $zipFilename = $this->validateFileName($zipFilename);
 
         $zip = new ZipArchive();
 
-        if (!$zip->open($zipFilename)) {
-            throw new FileHandlerException('Failed to open the ZIP archive.');
+        if (true !== $zip->open($zipFilename, $flag)) {
+            throw new FileHandlerException('Invalid or uninitialized Zip object');
         }
+
 
         if (!$zip->extractTo($extractPath)) {
             throw new FileHandlerException('Failed to extract the ZIP archive.');
@@ -117,18 +116,11 @@ class FileHandler
         $zip->close();
     }
 
-    /**
-     * @throws FileHandlerException
-     */
+
     public function close(): void
     {
-        if (!$this->files) {
-            throw new FileHandlerException('no files are opened');
-        }
         foreach ($this->files as $file) {
-            if (!fclose($file)) {
-                throw new FileHandlerException('file was not closed');
-            }
+            fclose($file);
         }
         $this->resetFiles();
     }
