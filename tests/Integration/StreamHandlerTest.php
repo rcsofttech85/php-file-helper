@@ -18,7 +18,7 @@ class StreamHandlerTest extends BaseTest
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
-        static::$files = ["output.html", "output1.html", "output2.html"];
+        static::$files = ["output.html", "output1.html", "output2.html", "profile"];
     }
 
     public static function tearDownAfterClass(): void

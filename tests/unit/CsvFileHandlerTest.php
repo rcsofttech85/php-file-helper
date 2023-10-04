@@ -25,6 +25,7 @@ class CsvFileHandlerTest extends BaseTest
         parent::tearDown();
 
         $this->csvFileHandler = null;
+        unlink('temp');
     }
 
     #[Test]
@@ -36,7 +37,64 @@ class CsvFileHandlerTest extends BaseTest
         $this->csvFileHandler->findAndReplaceInCsv("movie.csv", "Twilight", "hello", $columnName);
     }
 
+    /**
+     * @return void
+     */
+    #[Test]
+    public function throwExceptionIfHeadersCouldNotBeExtracted(): void
+    {
+        file_put_contents("temp", "");
+        $this->expectException(FileHandlerException::class);
+        $this->expectExceptionMessage('failed to extract header');
+        $this->csvFileHandler->findAndReplaceInCsv("temp", "Twilight", "hello");
+    }
 
+    #[Test]
+    public function throwExceptionIfFileFormatIsNotValid(): void
+    {
+        file_put_contents("temp", "File,Hash\nHello");
+        $this->expectException(FileHandlerException::class);
+        $this->expectExceptionMessage('invalid csv file format');
+        $this->csvFileHandler->findAndReplaceInCsv("temp", "Twilight", "hello");
+    }
+
+    #[Test]
+    public function throwExceptionIfFilenameIsInvalid(): void
+    {
+        $this->expectException(FileHandlerException::class);
+        $this->expectExceptionMessage('failed to extract header');
+        $this->csvFileHandler->findAndReplaceInCsv("temp", "Twilight", "hello");
+    }
+
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
+    #[Test]
+    public function shouldReturnFalseIfKeywordIsNotMatched(): void
+    {
+        $this->csvFileHandler->findAndReplaceInCsv("movie.csv", "Twil", "hello");
+        $this->assertFalse(false);
+    }
+
+    #[Test]
+    public function findAndReplaceShouldThrowErrorIfDirNameIsInValid(): void
+    {
+        $this->expectException(FileHandlerException::class);
+        $this->expectExceptionMessage("could not create temp file");
+        $this->csvFileHandler->findAndReplaceInCsv(
+            filename: 'movie.csv',
+            keyword: 'hello',
+            replace: 'how',
+            dirName: '/ab'
+        );
+    }
+
+
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
     #[Test]
     public function findAndReplaceInCsvMethodShouldReplaceTextWithoutColumnOption(): void
     {
@@ -48,6 +106,10 @@ class CsvFileHandlerTest extends BaseTest
         $this->assertStringContainsString('Inception', $data);
     }
 
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
     #[Test]
     public function findAndReplaceInCsvMethodShouldReplaceTextUsingColumnOption(): void
     {
@@ -57,6 +119,12 @@ class CsvFileHandlerTest extends BaseTest
         $this->assertTrue($hasReplaced);
         $this->assertStringContainsString('Twilight', $data);
     }
+
+    /**
+     * @param string $keyword
+     * @return void
+     * @throws FileHandlerException
+     */
 
     #[Test]
     #[DataProvider('provideMovieNames')]
@@ -70,9 +138,14 @@ class CsvFileHandlerTest extends BaseTest
         $this->assertTrue($isMovieAvailable);
     }
 
+    /**
+     * @param string $keyword
+     * @return void
+     * @throws FileHandlerException
+     */
     #[Test]
     #[DataProvider('provideStudioNames')]
-    public function searchBystudioName(string $keyword): void
+    public function searchByStudioName(string $keyword): void
     {
         $isStudioFound = $this->csvFileHandler->searchInCsvFile(
             filename: "movie.csv",
@@ -82,6 +155,10 @@ class CsvFileHandlerTest extends BaseTest
         $this->assertTrue($isStudioFound);
     }
 
+    /**
+     * @return void
+     * @throws FileHandlerException
+     */
     #[Test]
     public function toArrayMethodReturnsValidArray(): void
     {
@@ -115,6 +192,11 @@ class CsvFileHandlerTest extends BaseTest
         $this->assertEquals($expected, $data[0]);
     }
 
+    /**
+     * @param int $limit
+     * @return void
+     * @throws FileHandlerException
+     */
     #[Test]
     #[DataProvider('limitDataProvider')]
     public function toArrayMethodShouldRestrictNumberOfRecordsWhenLimitIsSet(int $limit): void
@@ -157,41 +239,41 @@ class CsvFileHandlerTest extends BaseTest
     {
         $jsonData = $this->csvFileHandler->toJson("movie.csv");
         if (!$jsonData) {
-            $this->fail('could not convert to json format');
+            $this->fail('Could not convert to JSON format');
         }
 
         $expectedData = '[
-    {
-        "Film":"Zack and Miri Make a Porno",
-        "Genre":"Romance",
-        "Lead Studio":"The Weinstein Company",
-        "Audience score %":"70",
-        "Profitability":"1.747541667",
-        "Rotten Tomatoes %":"64",
-        "Worldwide Gross":"$41.94 ",
-        "Year":"2008"
-    },
-    {
-        "Film":"Youth in Revolt",
-        "Genre":"Comedy",
-        "Lead Studio":"The Weinstein Company",
-        "Audience score %":"52",
-        "Profitability":"1.09",
-        "Rotten Tomatoes %":"68",
-        "Worldwide Gross":"$19.62 ",
-        "Year":"2010"
-    },
-    {
-        "Film":"Twilight",
-        "Genre":"Romance",
-        "Lead Studio":"Independent",
-        "Audience score %":"68",
-        "Profitability":"6.383363636",
-        "Rotten Tomatoes %":"26",
-        "Worldwide Gross":"$702.17 ",
-        "Year":"2011"
-    }
-]';
+        {
+            "Film": "Zack and Miri Make a Porno",
+            "Genre": "Romance",
+            "Lead Studio": "The Weinstein Company",
+            "Audience score %": "70",
+            "Profitability": "1.747541667",
+            "Rotten Tomatoes %": "64",
+            "Worldwide Gross": "$41.94 ",
+            "Year": "2008"
+        },
+        {
+            "Film": "Youth in Revolt",
+            "Genre": "Comedy",
+            "Lead Studio": "The Weinstein Company",
+            "Audience score %": "52",
+            "Profitability": "1.09",
+            "Rotten Tomatoes %": "68",
+            "Worldwide Gross": "$19.62 ",
+            "Year": "2010"
+        },
+        {
+            "Film": "Twilight",
+            "Genre": "Romance",
+            "Lead Studio": "Independent",
+            "Audience score %": "68",
+            "Profitability": "6.383363636",
+            "Rotten Tomatoes %": "26",
+            "Worldwide Gross": "$702.17 ",
+            "Year": "2011"
+        }
+    ]';
 
         $this->assertJson($jsonData);
         $this->assertJsonStringEqualsJsonString($expectedData, $jsonData);

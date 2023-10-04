@@ -66,8 +66,11 @@ class FileHashChecker
      * @throws HashException|FileHandlerException
      */
 
-    public function hashFile(string $filename, string $algo = self::ALGO_256): string
-    {
+    public function hashFile(
+        string $filename,
+        string $algo = self::ALGO_256,
+        string $env = self::STORED_HASH_FILE
+    ): string {
         $this->validateFileName($filename);
         if (!in_array($algo, [self::ALGO_512, self::ALGO_256])) {
             throw new HashException('algorithm not supported');
@@ -77,7 +80,7 @@ class FileHashChecker
             throw new HashException('could not hash file');
         }
 
-        $storedHashesFile = $this->getParameter(self::STORED_HASH_FILE);
+        $storedHashesFile = $this->getParameter($env);
 
 
         $file = fopen($storedHashesFile, 'a+');
@@ -111,7 +114,7 @@ class FileHashChecker
      * @param mixed $storedHashFile
      * @return void
      */
-    private function checkHeaderExists(mixed $storedHashFile): void
+    public function checkHeaderExists(mixed $storedHashFile): void
     {
         $header = fgetcsv($storedHashFile);
 
