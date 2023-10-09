@@ -77,10 +77,9 @@ trait FileValidatorTrait
     }
 
     /**
-     * @param string $param
      * @return ContainerBuilder
      */
-    private function getContainerBuilder(string $param): ContainerBuilder
+    private function getContainerBuilder(): ContainerBuilder
     {
         return (new ServiceContainer())->getContainerBuilder();
     }
@@ -94,7 +93,7 @@ trait FileValidatorTrait
     public function getParam(string $parameter, ContainerBuilder $container = null): string
     {
         if (null === $container) {
-            $container = $this->getContainerBuilder($parameter);
+            $container = $this->getContainerBuilder();
         }
         $param = $container->getParameter($parameter);
         if (!is_string($param)) {
