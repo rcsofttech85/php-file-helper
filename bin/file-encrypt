@@ -1,0 +1,96 @@
+#!/usr/bin/env php
+<?php
+
+require 'vendor/autoload.php';
+
+use Rcsofttech85\FileHandler\DependencyInjection\ServiceContainer;
+use Rcsofttech85\FileHandler\Exception\FileEncryptorException;
+use Rcsofttech85\FileHandler\Exception\FileHandlerException;
+use Rcsofttech85\FileHandler\FileEncryptor;
+use Rcsofttech85\FileHandler\Validator\FileValidatorTrait;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\SingleCommandApplication;
+use Symfony\Component\Console\Style\SymfonyStyle;
+
+const ENCRYPT = "encryption";
+const DECRYPT = "decryption";
+
+$command = (new SingleCommandApplication(name: 'file-encrypt'))
+    ->addArgument('file', InputArgument::REQUIRED, 'file name to encrypt to decrypt')
+    ->addOption(
+        'mode',
+        null,
+        InputOption::VALUE_REQUIRED,
+        'encrypt or decrypt mode',
+        'encryption'
+    )
+    ->setCode(function (InputInterface $input, OutputInterface $output): int {
+        $io = new SymfonyStyle($input, $output);
+
+        $file = $input->getArgument('file');
+        $mode = $input->getOption('mode');
+
+        if (!in_array($mode, [ENCRYPT, DECRYPT])) {
+            $io->error('invalid mode provided');
+            return Command::FAILURE;
+        }
+        $filValidator = (new class {
+            use FileValidatorTrait;
+        });
+
+        try {
+            $filValidator->validateFileName($file);
+        } catch (FileHandlerException) {
+            $io->error(
+                "{$file} does not exists"
+            );
+            return Command::FAILURE;
+        }
+
+        $serviceContainer = new ServiceContainer();
+
+        /** @var FileEncryptor $encryptor */
+        $encryptor = $serviceContainer->getContainerBuilder()->get('file_encryptor');
+        try {
+            $output->writeln("==================================");
+            $io->newLine();
+            $progressBar = new ProgressBar($output, 1);
+            $progressBar->start();
+            $progressBar->setBarCharacter('<fg=yellow>█</>');
+            $progressBar->setEmptyBarCharacter("<fg=black>█</>");
+            $progressBar->setProgressCharacter("<fg=bright-blue>➤</>");
+
+            $progressBar->start();
+
+            $isEncrypted = false;
+
+            if ($mode === DECRYPT) {
+                $isEncrypted = $encryptor->decryptFile($file);
+            }
+            if ($mode === ENCRYPT) {
+                $isEncrypted = $encryptor->encryptFile($file);
+            }
+            $progressBar->finish();
+            $io->newLine();
+            $output->writeln("==================================");
+            $io->newLine();
+        } catch (FileEncryptorException $e) {
+            $io->newLine();
+            $io->error($e->getMessage());
+            return Command::FAILURE;
+        }
+
+
+        if (!$isEncrypted) {
+            $io->error("could not {$mode} file");
+            return Command::FAILURE;
+        }
+
+        $io->success("The file {$mode} was successful");
+        return Command::SUCCESS;
+    })->run();

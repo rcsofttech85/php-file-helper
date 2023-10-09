@@ -1,20 +1,20 @@
 {
-    "_readme": [
-        "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
-        "This file is @generated automatically"
-    ],
-    "content-hash": "a70618a497ccabd8ea9b9b204d486392",
-    "packages": [
-        {
-            "name": "psr/container",
-            "version": "2.0.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-fig/container.git",
-                "reference": "c71ecc56dfe541dbd90c5360474fbc405f8d5963"
-            },
-            "dist": {
+  "_readme": [
+    "This file locks the dependencies of your project to a known state",
+    "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+    "This file is @generated automatically"
+  ],
+  "content-hash": "ed0bb561db970300d8eaff46e7476f32",
+  "packages": [
+    {
+      "name": "psr/container",
+      "version": "2.0.2",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/php-fig/container.git",
+        "reference": "c71ecc56dfe541dbd90c5360474fbc405f8d5963"
+      },
+      "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/php-fig/container/zipball/c71ecc56dfe541dbd90c5360474fbc405f8d5963",
                 "reference": "c71ecc56dfe541dbd90c5360474fbc405f8d5963",
@@ -756,26 +756,87 @@
                 },
                 {
                     "url": "https://github.com/fabpot",
-                    "type": "github"
+                  "type": "github"
                 },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
+              {
+                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                "type": "tidelift"
+              }
             ],
-            "time": "2023-07-28T09:04:16+00:00"
+          "time": "2023-07-28T09:04:16+00:00"
+        },
+    {
+      "name": "symfony/process",
+      "version": "v6.3.4",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/symfony/process.git",
+        "reference": "0b5c29118f2e980d455d2e34a5659f4579847c54"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/symfony/process/zipball/0b5c29118f2e980d455d2e34a5659f4579847c54",
+        "reference": "0b5c29118f2e980d455d2e34a5659f4579847c54",
+        "shasum": ""
+      },
+      "require": {
+        "php": ">=8.1"
+      },
+      "type": "library",
+      "autoload": {
+        "psr-4": {
+          "Symfony\\Component\\Process\\": ""
+        },
+        "exclude-from-classmap": [
+          "/Tests/"
+        ]
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "MIT"
+      ],
+      "authors": [
+        {
+          "name": "Fabien Potencier",
+          "email": "fabien@symfony.com"
         },
         {
-            "name": "symfony/service-contracts",
-            "version": "v3.3.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/service-contracts.git",
-                "reference": "40da9cc13ec349d9e4966ce18b5fbcd724ab10a4"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/40da9cc13ec349d9e4966ce18b5fbcd724ab10a4",
+          "name": "Symfony Community",
+          "homepage": "https://symfony.com/contributors"
+        }
+      ],
+      "description": "Executes commands in sub-processes",
+      "homepage": "https://symfony.com",
+      "support": {
+        "source": "https://github.com/symfony/process/tree/v6.3.4"
+      },
+      "funding": [
+        {
+          "url": "https://symfony.com/sponsor",
+          "type": "custom"
+        },
+        {
+          "url": "https://github.com/fabpot",
+          "type": "github"
+        },
+        {
+          "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+          "type": "tidelift"
+        }
+      ],
+      "time": "2023-08-07T10:39:22+00:00"
+    },
+    {
+      "name": "symfony/service-contracts",
+      "version": "v3.3.0",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/symfony/service-contracts.git",
+        "reference": "40da9cc13ec349d9e4966ce18b5fbcd724ab10a4"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/symfony/service-contracts/zipball/40da9cc13ec349d9e4966ce18b5fbcd724ab10a4",
                 "reference": "40da9cc13ec349d9e4966ce18b5fbcd724ab10a4",
                 "shasum": ""
             },
