@@ -55,7 +55,7 @@ trait FileValidatorTrait
      */
     private function isFileSafe(string $filename, string $envVariable): bool
     {
-        $safeFile = $this->getParameter($envVariable);
+        $safeFile = $this->getParam($envVariable);
 
 
         if ($safeFile !== $filename) {
@@ -69,6 +69,7 @@ trait FileValidatorTrait
      * @param string $filename
      * @param string $envVariable
      * @return bool
+     * @throws FileHandlerException
      */
     public function isFileRestricted(string $filename, string $envVariable): bool
     {
@@ -76,24 +77,24 @@ trait FileValidatorTrait
     }
 
     /**
-     * @param string $param
-     * @return string
-     * @throws FileHandlerException
+     * @return ContainerBuilder
      */
-    private function getParameter(string $param): string
+    private function getContainerBuilder(): ContainerBuilder
     {
-        $container = (new ServiceContainer())->getContainerBuilder();
-        return $this->getParam($container, $param);
+        return (new ServiceContainer())->getContainerBuilder();
     }
 
     /**
-     * @param ContainerBuilder $container
      * @param string $parameter
+     * @param ContainerBuilder|null $container
      * @return string
      * @throws FileHandlerException
      */
-    public function getParam(ContainerBuilder $container, string $parameter): string
+    public function getParam(string $parameter, ContainerBuilder $container = null): string
     {
+        if (null === $container) {
+            $container = $this->getContainerBuilder();
+        }
         $param = $container->getParameter($parameter);
         if (!is_string($param)) {
             throw new FileHandlerException("{$parameter} is not string type");

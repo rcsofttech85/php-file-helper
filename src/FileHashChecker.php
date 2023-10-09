@@ -35,7 +35,7 @@ class FileHashChecker
 
     public function verifyHash(string $filename, string $algo = self::ALGO_256): bool
     {
-        $storedHashesFile = $this->getParameter(self::STORED_HASH_FILE);
+        $storedHashesFile = $this->getParam(self::STORED_HASH_FILE);
         $file = $this->csvFileHandler->searchInCsvFile(
             filename: $storedHashesFile,
             keyword: $filename,
@@ -62,8 +62,10 @@ class FileHashChecker
     /**
      * @param string $filename
      * @param string $algo
+     * @param string $env
      * @return string
-     * @throws HashException|FileHandlerException
+     * @throws FileHandlerException
+     * @throws HashException
      */
 
     public function hashFile(
@@ -80,7 +82,7 @@ class FileHashChecker
             throw new HashException('could not hash file');
         }
 
-        $storedHashesFile = $this->getParameter($env);
+        $storedHashesFile = $this->getParam($env);
 
 
         $file = fopen($storedHashesFile, 'a+');
@@ -100,7 +102,7 @@ class FileHashChecker
             if (!$filenameExists) {
                 fputcsv($file, [$filename, $hash]);
             }
-        } catch (FileHandlerException) {
+        } catch (FileHandlerException $e) {
             fputcsv($file, [$filename, $hash]);
         } finally {
             fclose($file);
