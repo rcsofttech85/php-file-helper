@@ -1,0 +1,36 @@
+#!/usr/bin/env php
+<?php
+
+require 'vendor/autoload.php';
+
+use Rcsofttech85\FileHandler\Exception\FileHandlerException;
+use Rcsofttech85\FileHandler\Validator\FileValidatorTrait;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\SingleCommandApplication;
+use Symfony\Component\Console\Style\SymfonyStyle;
+
+$command = (new SingleCommandApplication(name: 'file-encrypt'))
+    ->addArgument('file', InputArgument::REQUIRED, 'file name to encrypt to decrypt')
+    ->setCode(function (InputInterface $input, OutputInterface $output): int {
+        $io = new SymfonyStyle($input, $output);
+
+        $file = $input->getArgument('file');
+        $filValidator = (new class {
+            use FileValidatorTrait;
+        });
+
+        try {
+            $filValidator->validateFileName($file);
+        } catch (FileHandlerException) {
+            $io->error(
+                "{$file} does not exists"
+            );
+            return Command::FAILURE;
+        }
+
+        $io->success("helllo");
+        return Command::SUCCESS;
+    })->run();
