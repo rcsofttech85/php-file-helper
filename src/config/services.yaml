@@ -1,17 +1,14 @@
-parameters:
-  filename: 'movie.csv'
-  secret: 'password'
-
-
-
-
 services:
+  container:
+    class: 'Rcsofttech85\FileHandler\DependencyInjection\ServiceContainer'
+
   file_handler:
     class: 'Rcsofttech85\FileHandler\FileHandler'
 
   file_encryptor:
     class: 'Rcsofttech85\FileHandler\FileEncryptor'
-    arguments: [ '%filename%','%secret%' ]
+    arguments: [ '@container' ]
+
 
   temp_file_handler:
     class: 'Rcsofttech85\FileHandler\TempFileHandler'

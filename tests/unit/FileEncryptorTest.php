@@ -5,6 +5,7 @@ namespace unit;
 use Base\BaseTest;
 use PHPUnit\Framework\Attributes\Test;
 use Rcsofttech85\FileHandler\Exception\FileEncryptorException;
+use Rcsofttech85\FileHandler\Exception\FileHandlerException;
 use Rcsofttech85\FileHandler\FileEncryptor;
 use SodiumException;
 
@@ -29,6 +30,7 @@ class FileEncryptorTest extends BaseTest
     /**
      * @return void
      * @throws FileEncryptorException
+     * @throws FileHandlerException
      * @throws SodiumException
      */
     #[Test]
@@ -36,8 +38,9 @@ class FileEncryptorTest extends BaseTest
     {
         $this->expectException(FileEncryptorException::class);
         $this->expectExceptionMessage('file is not encrypted');
-        $this->fileEncryptor->decryptFile();
+        $this->fileEncryptor->decryptFile('movie.csv');
     }
+
 
     /**
      * @return void
@@ -46,10 +49,11 @@ class FileEncryptorTest extends BaseTest
     #[Test]
     public function canEncryptFile(): void
     {
-        $isFileEncrypted = $this->fileEncryptor->encryptFile();
+        $isFileEncrypted = $this->fileEncryptor->encryptFile('movie.csv');
 
         $this->assertTrue($isFileEncrypted);
     }
+
 
     /**
      * @return void
@@ -60,8 +64,9 @@ class FileEncryptorTest extends BaseTest
     {
         $this->expectException(FileEncryptorException::class);
         $this->expectExceptionMessage('file is already encrypted');
-        $this->fileEncryptor->encryptFile();
+        $this->fileEncryptor->encryptFile('movie.csv');
     }
+
 
     /**
      * @return void
@@ -71,11 +76,11 @@ class FileEncryptorTest extends BaseTest
     public function throwExceptionIfFileHasNoContentWhileEncrypt(): void
     {
         file_put_contents("test", "");
-        $file = new FileEncryptor('test', 'pass');
         $this->expectException(FileEncryptorException::class);
         $this->expectExceptionMessage('File has no content');
-        $file->encryptFile();
+        $this->fileEncryptor->encryptFile('test');
     }
+
 
     #[Test]
     public function throwExceptionIfCouldNotConvertHexToBin(): void
@@ -89,42 +94,55 @@ class FileEncryptorTest extends BaseTest
      * @return void
      * @throws FileEncryptorException
      * @throws SodiumException
+     * @throws FileHandlerException
      */
     #[Test]
     public function throwExceptionIfFileHasNoContent(): void
     {
         file_put_contents("test", "");
-        $file = new FileEncryptor('test', 'pass');
         $this->expectException(FileEncryptorException::class);
         $this->expectExceptionMessage('File has no content');
-        $file->decryptFile();
+        $this->fileEncryptor->decryptFile('test');
     }
+
 
     /**
      * @return void
      * @throws FileEncryptorException
+     * @throws FileHandlerException
      * @throws SodiumException
      */
-
     #[Test]
     public function throwExceptionIfDecryptionFails(): void
     {
-        $fileEncryptor = new FileEncryptor('movie.csv', 'wrong');
+        $filePath = '.env';
+        $originalContent = file_get_contents($filePath);
+        if (!$originalContent) {
+            $this->fail('file not found');
+        }
+        $password = $_ENV[FileEncryptor::ENCRYPT_PASSWORD];
+        $updatedContent = str_replace($password, 'pass', $originalContent);
 
-        $this->expectException(FileEncryptorException::class);
-        $this->expectExceptionMessage('could not decrypt file');
-        $fileEncryptor->decryptFile();
+        file_put_contents($filePath, $updatedContent);
+        try {
+            $this->expectException(FileEncryptorException::class);
+            $this->expectExceptionMessage('could not decrypt file');
+            $this->fileEncryptor->decryptFile('movie.csv');
+        } finally {
+            file_put_contents($filePath, $originalContent);
+        }
     }
 
     /**
      * @return void
      * @throws FileEncryptorException
+     * @throws FileHandlerException
      * @throws SodiumException
      */
     #[Test]
     public function canDecryptFile(): void
     {
-        $isFileDecrypted = $this->fileEncryptor->decryptFile();
+        $isFileDecrypted = $this->fileEncryptor->decryptFile('movie.csv');
 
         $this->assertTrue($isFileDecrypted);
     }

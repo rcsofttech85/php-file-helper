@@ -3,27 +3,20 @@
 namespace Rcsofttech85\FileHandler;
 
 use Exception;
+use Rcsofttech85\FileHandler\DependencyInjection\ServiceContainer;
 use Rcsofttech85\FileHandler\Exception\FileEncryptorException;
 use Rcsofttech85\FileHandler\Exception\FileHandlerException;
 use Rcsofttech85\FileHandler\Validator\FileValidatorTrait;
-use SensitiveParameter;
 use SodiumException;
 
-readonly class FileEncryptor
+final class FileEncryptor
 {
     use FileValidatorTrait;
 
-    /**
-     * @param string $filename
-     * @param string $secret
-     *
-     * @throws FileHandlerException
-     */
-    public function __construct(
-        private string $filename,
-        #[SensitiveParameter] private string $secret
-    ) {
-        $this->validateFileName($filename);
+    public const ENCRYPT_PASSWORD = 'ENCRYPT_PASSWORD';
+
+    public function __construct(private ServiceContainer $serviceContainer)
+    {
     }
 
     /**
@@ -32,9 +25,10 @@ readonly class FileEncryptor
      * @throws Exception
      *
      */
-    public function encryptFile(): bool
+    public function encryptFile(string $filename): bool
     {
-        $plainText = file_get_contents($this->filename);
+        $this->validateFileName($filename);
+        $plainText = file_get_contents($filename);
 
         if (!$plainText) {
             throw new FileEncryptorException('File has no content');
@@ -46,15 +40,18 @@ readonly class FileEncryptor
 
         $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
 
+        $container = $this->serviceContainer->getContainerBuilder();
 
-        $key = hash('sha256', $this->secret, true);
+        $secret = $this->getParam($container, self::ENCRYPT_PASSWORD);
+
+        $key = hash('sha256', $secret, true);
 
 
         $ciphertext = sodium_crypto_secretbox($plainText, $nonce, $key);
 
         $output = bin2hex($nonce . $ciphertext);
 
-        $file = $this->openFileAndReturnResource($this->filename);
+        $file = $this->openFileAndReturnResource($filename);
 
         try {
             fwrite($file, $output);
@@ -71,9 +68,10 @@ readonly class FileEncryptor
      * @throws FileHandlerException
      * @throws SodiumException
      */
-    public function decryptFile(): bool
+    public function decryptFile(string $filename): bool
     {
-        $encryptedData = file_get_contents($this->filename);
+        $this->validateFileName($filename);
+        $encryptedData = file_get_contents($filename);
 
         if (!$encryptedData) {
             throw new FileEncryptorException('File has no content');
@@ -83,21 +81,26 @@ readonly class FileEncryptor
             throw new FileEncryptorException('file is not encrypted');
         }
 
+
         $bytes = $this->convertHexToBin($encryptedData);
 
         $nonce = substr($bytes, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
         $ciphertext = substr($bytes, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
 
-        $key = hash('sha256', $this->secret, true);
+        $container = $this->serviceContainer->getContainerBuilder();
+
+        $secret = $this->getParam($container, self::ENCRYPT_PASSWORD);
+
+        $key = hash('sha256', $secret, true);
 
         $plaintext = sodium_crypto_secretbox_open($ciphertext, $nonce, $key);
+        $file = $this->openFileAndReturnResource($filename);
 
         if (!$plaintext) {
+            fwrite($file, $encryptedData);
             throw new FileEncryptorException('could not decrypt file');
         }
 
-
-        $file = $this->openFileAndReturnResource($this->filename);
 
         try {
             fwrite($file, $plaintext);
