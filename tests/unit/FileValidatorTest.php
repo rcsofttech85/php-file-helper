@@ -52,7 +52,7 @@ class FileValidatorTest extends BaseTest
         $container->setParameter('arr', []);
         $this->expectException(FileHandlerException::class);
         $this->expectExceptionMessage("arr is not string type");
-        $this->getParam($container, 'arr');
+        $this->getParam('arr', $container);
     }
 
     #[Test]

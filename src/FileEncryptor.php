@@ -3,7 +3,6 @@
 namespace Rcsofttech85\FileHandler;
 
 use Exception;
-use Rcsofttech85\FileHandler\DependencyInjection\ServiceContainer;
 use Rcsofttech85\FileHandler\Exception\FileEncryptorException;
 use Rcsofttech85\FileHandler\Exception\FileHandlerException;
 use Rcsofttech85\FileHandler\Validator\FileValidatorTrait;
@@ -14,10 +13,6 @@ final class FileEncryptor
     use FileValidatorTrait;
 
     public const ENCRYPT_PASSWORD = 'ENCRYPT_PASSWORD';
-
-    public function __construct(private ServiceContainer $serviceContainer)
-    {
-    }
 
     /**
      *
@@ -40,9 +35,8 @@ final class FileEncryptor
 
         $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
 
-        $container = $this->serviceContainer->getContainerBuilder();
 
-        $secret = $this->getParam($container, self::ENCRYPT_PASSWORD);
+        $secret = $this->getParam(self::ENCRYPT_PASSWORD);
 
         $key = hash('sha256', $secret, true);
 
@@ -87,9 +81,8 @@ final class FileEncryptor
         $nonce = substr($bytes, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
         $ciphertext = substr($bytes, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
 
-        $container = $this->serviceContainer->getContainerBuilder();
 
-        $secret = $this->getParam($container, self::ENCRYPT_PASSWORD);
+        $secret = $this->getParam(self::ENCRYPT_PASSWORD);
 
         $key = hash('sha256', $secret, true);
 

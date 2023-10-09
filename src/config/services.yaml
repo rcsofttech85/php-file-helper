@@ -1,13 +1,10 @@
 services:
-  container:
-    class: 'Rcsofttech85\FileHandler\DependencyInjection\ServiceContainer'
-
   file_handler:
     class: 'Rcsofttech85\FileHandler\FileHandler'
 
   file_encryptor:
     class: 'Rcsofttech85\FileHandler\FileEncryptor'
-    arguments: [ '@container' ]
+
 
 
   temp_file_handler:
