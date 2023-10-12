@@ -8,6 +8,12 @@ use Symfony\Component\Process\Process;
 
 class FileEncryptCommandTest extends TestCase
 {
+    public static function tearDownAfterClass(): void
+    {
+        parent::tearDownAfterClass();
+        unlink("dummy.txt");
+    }
+
     #[Test]
     public function fileIsEncryptedProperly(): void
     {
