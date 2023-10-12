@@ -25,12 +25,12 @@
     "symfony/dependency-injection": "^6.3",
     "symfony/config": "^6.3",
     "symfony/yaml": "^6.3",
-    "symfony/process": "^6.3"
+    "symfony/process": "^6.3",
+    "symfony/dotenv": "^6.3"
   },
   "require-dev": {
     "phpunit/phpunit": "^10",
     "squizlabs/php_codesniffer": "^3.7",
-    "symfony/dotenv": "^6.3",
     "symfony/var-dumper": "^6.3",
     "phpstan/phpstan": "^1.10"
   },
