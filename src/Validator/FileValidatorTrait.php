@@ -20,7 +20,7 @@ trait FileValidatorTrait
     public function validateFileName(string $filename, string|null $path = null): string
     {
         if (!$this->isFileSafe($filename, self::STORED_HASH_FILE)) {
-            $this->sanitize($filename);
+            $filename = $this->sanitize($filename);
         }
 
 
@@ -29,6 +29,9 @@ trait FileValidatorTrait
             $absolutePath ?:
                 throw new FileHandlerException("path {$path} is not valid')");
             $filename = $absolutePath . DIRECTORY_SEPARATOR . $filename;
+        }
+        if (!file_exists($filename)) {
+            throw new FileHandlerException("file does not exists!");
         }
 
         return $filename;
